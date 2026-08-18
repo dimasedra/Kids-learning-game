@@ -4,82 +4,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Little Champion</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+    <!-- Phaser Engine -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             touch-action: none;
-            /* Support Safe Area Inset Notch iPhone/Android */
             padding-top: env(safe-area-inset-top);
             padding-bottom: env(safe-area-inset-bottom);
         }
-        /* Fallback Cross-Browser Height */
         .app-viewport {
-            height: 100vh; /* Fallback Browser Lama */
-            height: 100dvh; /* Dynamic Viewport Modern Browser */
+            height: 100vh;
+            height: 100dvh;
         }
         .btn-3d { transition: all 0.1s ease; }
         .btn-3d:active { transform: translateY(4px); box-shadow: none !important; }
-        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .pop-in { animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes popIn {
-            0% { transform: scale(0.8); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            0% { transform: scale(0.7) translateY(-20px); opacity: 0; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         .float-anim { animation: floatAnim 3s ease-in-out infinite; }
+        .float-anim-reverse { animation: floatAnimRev 3.5s ease-in-out infinite; }
         @keyframes floatAnim {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-6px) rotate(3deg); }
+            50% { transform: translateY(-8px) rotate(4deg); }
+        }
+        @keyframes floatAnimRev {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(8px) rotate(-4deg); }
+        }
+        .pulse-text { animation: pulseAnim 1.5s ease-in-out infinite; }
+        @keyframes pulseAnim {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.96); }
         }
     </style>
 </head>
 <body class="bg-slate-100 app-viewport w-screen flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
 
+  <!-- FRAME UTAMA GAME -->
   <div class="relative w-full max-w-[420px] h-full md:max-h-[750px] bg-white md:rounded-[32px] border-0 md:border-4 border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between">
     
-    <div id="screen-cover" class="absolute inset-0 z-20 bg-gradient-to-b from-amber-50 via-sky-50 to-white p-5 flex flex-col justify-between items-center text-center pop-in overflow-y-auto">
+    <!-- GLOBAL AUDIO MUTE / UNMUTE FLOATING BUTTON -->
+    <button id="btn-sound-toggle" onclick="toggleSound(); playClickSFX();" class="absolute top-3 right-3 z-40 w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-amber-300 rounded-2xl shadow-md flex items-center justify-center text-lg btn-3d">
+      🔊
+    </button>
+
+    <!-- ==================== 0. BUMPER OPENING SCREEN ==================== -->
+    <div id="screen-bumper" onclick="enterAppFromBumper()" class="absolute inset-0 z-50 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-200 p-6 flex flex-col justify-between items-center text-center cursor-pointer">
+      <div class="pt-8">
+        <span class="inline-block bg-white/80 backdrop-blur-sm text-amber-950 text-xs font-black px-4 py-1.5 rounded-full border border-white/60 shadow-sm">
+          🎮 GAME EDUKASI ANAK
+        </span>
+      </div>
+
+      <div class="flex flex-col items-center justify-center my-auto">
+        <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl mb-6 float-anim border-4 border-amber-200 text-6xl">
+          👑
+        </div>
+        <h1 class="text-3xl font-black text-amber-950 tracking-tight drop-shadow-sm mb-1">LITTLE CHAMPION</h1>
+        <p class="text-xs font-bold text-amber-900/80">COC Kids Academy</p>
+      </div>
+
+      <div class="pb-10 w-full">
+        <div class="bg-white/90 backdrop-blur-md text-amber-950 font-black py-4 px-6 rounded-2xl shadow-lg border-2 border-white pulse-text flex items-center justify-center space-x-2">
+          <span class="text-xl">👉</span>
+          <span class="text-sm">KETUK LAYAR UNTUK MAIN</span>
+          <span class="text-xl">✨</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 1. COVER SCREEN ==================== -->
+    <div id="screen-cover" class="absolute inset-0 z-20 bg-gradient-to-b from-amber-50 via-sky-50 to-white p-5 flex flex-col justify-between items-center text-center pop-in overflow-y-auto hidden">
       
+      <!-- Top Title Header -->
       <div class="w-full pt-2">
-        <div class="inline-flex items-center gap-1.5 bg-yellow-300/80 backdrop-blur-sm text-amber-950 text-[11px] font-black px-3.5 py-1 rounded-full border border-yellow-400 shadow-sm mb-2">
+        <div class="inline-flex items-center gap-1.5 bg-amber-300/90 backdrop-blur-sm text-amber-950 text-[11px] font-black px-4 py-1.5 rounded-full border border-amber-400 shadow-sm mb-2">
           <span>✨</span> COC KIDS ACADEMY <span>✨</span>
         </div>
-        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight drop-shadow-sm">LITTLE CHAMPION</h1>
-        <p class="text-[11px] font-extrabold text-amber-700/80 mt-0.5 uppercase tracking-wider">Belajar Seru & Asah Logika</p>
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight drop-shadow-xs">LITTLE CHAMPION</h1>
+        <p class="text-[11px] font-extrabold text-amber-700 mt-0.5 uppercase tracking-wider">Belajar Seru & Asah Logika</p>
       </div>
 
-      <div class="my-auto py-2 relative w-full flex items-center justify-center min-h-[160px]">
-        <div class="absolute w-44 h-44 bg-yellow-200/50 rounded-full blur-xl"></div>
-        <div class="absolute top-0 left-6 bg-white p-2.5 rounded-2xl shadow-md border border-amber-200 float-anim text-xl">🧩</div>
-        <div class="absolute bottom-0 right-6 bg-white p-2.5 rounded-2xl shadow-md border border-sky-200 float-anim text-xl" style="animation-delay: 1.5s;">🚀</div>
-        <div class="absolute top-2 right-4 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-emerald-200 text-[10px] font-black text-emerald-700">⭐ 100+ Soal</div>
+      <!-- Hero Visual Section -->
+      <div class="my-auto py-2 relative w-full flex items-center justify-center min-h-[220px]">
+        <div class="absolute w-56 h-56 bg-amber-200/60 rounded-full blur-2xl"></div>
 
-        <div class="w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-tr from-yellow-400 to-amber-300 rounded-[30px] flex flex-col items-center justify-center shadow-lg border-4 border-white relative z-10 transform rotate-3">
-          <div class="text-6xl sm:text-7xl drop-shadow-md">🐱</div>
-          <div class="bg-amber-900 text-yellow-200 text-[9px] font-black px-2 py-0.5 rounded-md mt-0.5">SUPER KIDS</div>
+        <div class="absolute top-2 left-4 bg-white p-3 rounded-2xl shadow-md border-2 border-amber-200 float-anim text-2xl">
+          ✏️
+        </div>
+        <div class="absolute bottom-4 right-4 bg-white p-3 rounded-2xl shadow-md border-2 border-sky-200 float-anim text-2xl" style="animation-delay: 1.2s;">
+          🚀
+        </div>
+        <div class="absolute top-4 right-14 bg-white p-3 rounded-2xl shadow-md border-2 border-amber-300 float-anim-reverse text-2xl">
+          ⭐
+        </div>
+        <div class="absolute bottom-2 left-6 bg-white p-3 rounded-2xl shadow-md border-2 border-purple-200 float-anim-reverse text-2xl">
+          🧩
+        </div>
+
+        <div class="w-40 h-40 bg-gradient-to-tr from-amber-300 via-yellow-300 to-amber-200 rounded-[38px] flex flex-col items-center justify-center shadow-xl border-4 border-white relative z-10 transform rotate-2">
+          <svg class="w-28 h-28 drop-shadow-md" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="14" fill="#D97706"/>
+            <circle cx="25" cy="25" r="8" fill="#FDE68A"/>
+            <circle cx="75" cy="25" r="14" fill="#D97706"/>
+            <circle cx="75" cy="25" r="8" fill="#FDE68A"/>
+            <circle cx="50" cy="52" r="35" fill="#F59E0B"/>
+            <ellipse cx="50" cy="62" rx="16" ry="12" fill="#FEF3C7"/>
+            <ellipse cx="50" cy="56" rx="6" ry="4" fill="#78350F"/>
+            <circle cx="36" cy="48" r="4.5" fill="#1E293B"/>
+            <circle cx="37.5" cy="46.5" r="1.5" fill="white"/>
+            <circle cx="64" cy="48" r="4.5" fill="#1E293B"/>
+            <circle cx="65.5" cy="46.5" r="1.5" fill="white"/>
+            <ellipse cx="28" cy="56" rx="5" ry="3" fill="#F472B6" opacity="0.7"/>
+            <ellipse cx="72" cy="56" rx="5" ry="3" fill="#F472B6" opacity="0.7"/>
+          </svg>
+          <div class="bg-amber-950 text-yellow-300 text-[10px] font-black px-3 py-0.5 rounded-full shadow-xs -mt-1">
+            LITTLE HERO 👑
+          </div>
         </div>
       </div>
 
+      <!-- Action Buttons -->
       <div class="w-full space-y-2.5 pb-2">
-        <button id="btn-start" onclick="handleStartBtn()" class="btn-3d w-full py-3.5 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-base rounded-2xl shadow-[0_5px_0_#d97706] tracking-wide">
+        <button id="btn-start" onclick="playClickSFX(); handleStartBtn();" class="btn-3d w-full py-4 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-base rounded-2xl shadow-[0_5px_0_#d97706] tracking-wide">
           MULAI MAIN ▶
         </button>
-        <button id="btn-reset" onclick="resetProgress()" class="hidden btn-3d w-full py-2.5 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-500 font-bold text-xs rounded-2xl shadow-[0_3px_0_#e2e8f0]">
+        <button id="btn-reset" onclick="playClickSFX(); resetProgress();" class="hidden btn-3d w-full py-2.5 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-500 font-bold text-xs rounded-2xl shadow-[0_3px_0_#e2e8f0]">
           Mulai Dari Awal 🔄
         </button>
       </div>
     </div>
 
+    <!-- ==================== 2. PILIH GRADE ==================== -->
     <div id="screen-grade" class="absolute inset-0 z-20 bg-white p-5 flex flex-col justify-between hidden pop-in">
       <div>
         <div class="flex items-center justify-between mb-4">
-          <button onclick="showScreen('screen-cover')" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
+          <button onclick="playClickSFX(); showScreen('screen-cover');" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
           <h2 class="text-lg font-black text-slate-800">Pilih Tingkatan</h2>
           <div class="w-9"></div>
         </div>
         
         <div class="space-y-3">
-          <button onclick="selectGrade('TK-A')" class="btn-3d w-full p-3.5 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#eab308]">
+          <button onclick="playClickSFX(); selectGrade('TK-A');" class="btn-3d w-full p-3.5 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#eab308]">
             <div>
               <div class="font-black text-yellow-900 text-base">TK-A (3-4 Tahun) 🐥</div>
               <div class="text-[11px] font-bold text-yellow-700">Hitung benda & pola sederhana</div>
@@ -87,7 +160,7 @@
             <span class="text-xl">➔</span>
           </button>
 
-          <button onclick="selectGrade('TK-B')" class="btn-3d w-full p-3.5 bg-sky-100 border-2 border-sky-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#0284c7]">
+          <button onclick="playClickSFX(); selectGrade('TK-B');" class="btn-3d w-full p-3.5 bg-sky-100 border-2 border-sky-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#0284c7]">
             <div>
               <div class="font-black text-sky-900 text-base">TK-B (5-6 Tahun) 🦊</div>
               <div class="text-[11px] font-bold text-sky-700">Penjumlahan & Phonics A-Z</div>
@@ -95,7 +168,7 @@
             <span class="text-xl">➔</span>
           </button>
 
-          <button onclick="selectGrade('SD-1')" class="btn-3d w-full p-3.5 bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#16a34a]">
+          <button onclick="playClickSFX(); selectGrade('SD-1');" class="btn-3d w-full p-3.5 bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#16a34a]">
             <div>
               <div class="font-black text-emerald-900 text-base">SD Kelas 1 (COC) 🦁</div>
               <div class="text-[11px] font-bold text-emerald-700">Matematika belasan & eja kata</div>
@@ -106,17 +179,20 @@
       </div>
     </div>
 
+    <!-- ==================== 3. PILIH STAGE ==================== -->
     <div id="screen-stage" class="absolute inset-0 z-20 bg-white p-5 flex flex-col hidden pop-in">
       <div class="flex items-center justify-between mb-3">
-        <button onclick="showScreen('screen-grade')" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
+        <button onclick="playClickSFX(); showScreen('screen-grade');" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
         <h2 id="stage-title" class="text-base font-black text-slate-800">Stage TK-A</h2>
         <div class="w-9"></div>
       </div>
 
-      <div id="stage-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto pb-4">
-        </div>
+      <div id="stage-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto pb-4 flex-1">
+        <!-- Rendered by JS -->
+      </div>
     </div>
 
+    <!-- ==================== 5. MODAL STAGE CLEAR ==================== -->
     <div id="modal-stage-clear" class="absolute inset-0 z-30 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-5 hidden pop-in">
       <div class="bg-white rounded-[24px] border-4 border-amber-300 p-5 w-full text-center shadow-2xl space-y-3">
         <div class="text-5xl animate-bounce">🏆</div>
@@ -130,22 +206,23 @@
         </div>
 
         <div class="space-y-2 pt-1">
-          <button id="btn-next-stage" onclick="goToNextStage()" class="btn-3d w-full py-3 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-sm rounded-xl shadow-[0_4px_0_#d97706]">
+          <button id="btn-next-stage" onclick="playClickSFX(); goToNextStage();" class="btn-3d w-full py-3 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-sm rounded-xl shadow-[0_4px_0_#d97706]">
             LANJUT KE STAGE 2 ▶
           </button>
-          <button onclick="showScreen('screen-stage')" class="btn-3d w-full py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-600 font-bold text-xs rounded-xl shadow-[0_3px_0_#cbd5e1]">
+          <button onclick="playClickSFX(); goToStageMenuFromModal();" class="btn-3d w-full py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-600 font-bold text-xs rounded-xl shadow-[0_3px_0_#cbd5e1]">
             Kembali ke Pilih Stage 🗺️
           </button>
         </div>
       </div>
     </div>
 
+    <!-- ==================== 4. GAMEPLAY INTERACTIVE ==================== -->
     <div id="hud-bar" class="p-3 flex justify-between items-center border-b border-slate-100 z-10 bg-white">
-      <button onclick="showScreen('screen-stage')" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-xs">🏠</button>
-      <div class="flex items-center space-x-1">
+      <button onclick="playClickSFX(); goToStageMenuFromModal();" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-xs">🏠</button>
+      <div class="flex items-center space-x-1 pr-8">
         <span class="text-yellow-500 font-black text-base">⭐ <span id="txt-score">0</span></span>
       </div>
-      <div class="bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-black px-2.5 py-1 rounded-full" id="txt-progress">
+      <div class="bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-black px-2.5 py-1 rounded-full mr-8" id="txt-progress">
         STAGE 1 (1/10)
       </div>
     </div>
@@ -163,8 +240,19 @@
 
     <div class="relative flex-1 w-full bg-slate-50 flex items-center justify-center overflow-hidden">
       <div id="phaser-canvas-container" class="w-full h-full flex items-center justify-center"></div>
-      <div id="feedback-toast" class="hidden absolute top-2 bg-white border-2 px-4 py-2 rounded-xl text-xs font-black shadow-lg pop-in">
-        🎉 BENAR! Pintar Banget!
+      
+      <!-- CUTE TOAST NOTIFICATION CARD -->
+      <div id="feedback-toast" class="hidden absolute top-4 inset-x-4 z-30 bg-white/95 backdrop-blur-md border-2 p-3.5 rounded-2xl shadow-xl pop-in flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div id="toast-icon-bg" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner">
+            🎉
+          </div>
+          <div class="text-left">
+            <h4 id="toast-title" class="text-sm font-black tracking-tight">HEBAT! JAWABAN BENAR</h4>
+            <p id="toast-sub" class="text-[11px] font-bold text-slate-400">Dapat +10 Poin Bintang ⭐</p>
+          </div>
+        </div>
+        <span id="toast-badge" class="text-lg">✨</span>
       </div>
     </div>
 
@@ -187,7 +275,284 @@ let unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1 };
 let currentQData = null;
 let phaserScene = null;
 
-// Phaser Config Dynamic Canvas
+// Audio System
+let audioCtx = null;
+let isSoundMuted = false;
+let bgmTimer = null;
+
+function initAudioContext() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+// EFEK CARTOON BOING BUMPER OPENING
+function playBumperBoingSFX() {
+    if (isSoundMuted) return;
+    try {
+        initAudioContext();
+        const now = audioCtx.currentTime;
+        
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(750, now + 0.28);
+
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.28);
+    } catch(e) {}
+}
+
+function enterAppFromBumper() {
+    initAudioContext();
+    playBumperBoingSFX();
+    
+    setTimeout(() => {
+        startBGM();
+    }, 150);
+
+    document.getElementById('screen-bumper').classList.add('hidden');
+    showScreen('screen-cover');
+}
+
+// 16-BIT AUDIO SYNTHESIZER (HARVEST MOON BTN POLYPHONIC SOUND ENGINE)
+function play16BitNote(freq, bassFreq, isAccent) {
+    if (isSoundMuted || !audioCtx) return;
+    try {
+        const now = audioCtx.currentTime;
+
+        // LAYER 1: ACOUSTIC WOODEN MARIMBA / XYLOPHONE (Harmonic Sine + Triangle Layering)
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gainMelody = audioCtx.createGain();
+
+        osc1.type = 'sine';     // Fundamental Tone
+        osc2.type = 'triangle'; // Rich Harmonic Layer
+        
+        osc1.frequency.setValueAtTime(freq, now);
+        osc2.frequency.setValueAtTime(freq * 2, now); // 1-Octave Higher Resonance
+
+        gainMelody.gain.setValueAtTime(0.08, now);
+        gainMelody.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+        osc1.connect(gainMelody);
+        osc2.connect(gainMelody);
+        gainMelody.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.22);
+        osc2.stop(now + 0.22);
+
+        // LAYER 2: 16-BIT BASSLINE (Warm Plucked Bass)
+        if (bassFreq) {
+            const bassOsc = audioCtx.createOscillator();
+            const bassGain = audioCtx.createGain();
+
+            bassOsc.type = 'triangle';
+            bassOsc.frequency.setValueAtTime(bassFreq, now);
+
+            bassGain.gain.setValueAtTime(0.07, now);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+            bassOsc.connect(bassGain);
+            bassGain.connect(audioCtx.destination);
+
+            bassOsc.start(now);
+            bassOsc.stop(now + 0.25);
+        }
+
+        // LAYER 3: PERCUSSION METRONOME (High-Hat Metronome Tick)
+        if (isAccent) {
+            const percOsc = audioCtx.createOscillator();
+            const percGain = audioCtx.createGain();
+
+            percOsc.type = 'square';
+            percOsc.frequency.setValueAtTime(1800, now);
+
+            percGain.gain.setValueAtTime(0.015, now);
+            percGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
+
+            percOsc.connect(percGain);
+            percGain.connect(audioCtx.destination);
+
+            percOsc.start(now);
+            percOsc.stop(now + 0.03);
+        }
+
+    } catch(e) {}
+}
+
+function startBGM() {
+    if (isSoundMuted || bgmTimer) return;
+    initAudioContext();
+
+    // Harvest Moon BTN Spring Theme 16-Bit Polyphonic Score
+    const hm16BitMelody = [
+        // Bar 1 - C Major
+        { f: 523.25, b: 130.81, acc: true },  { f: 659.25, b: null,   acc: false },
+        { f: 783.99, b: 196.00, acc: false }, { f: 1046.50, b: null,  acc: true },
+        { f: 880.00, b: 130.81, acc: false }, { f: 783.99, b: null,   acc: false },
+        { f: 659.25, b: 196.00, acc: true },  { f: 523.25, b: null,   acc: false },
+
+        // Bar 2 - D Minor
+        { f: 587.33, b: 146.83, acc: true },  { f: 698.46, b: null,   acc: false },
+        { f: 880.00, b: 220.00, acc: false }, { f: 1174.66, b: null,  acc: true },
+        { f: 1046.50, b: 146.83, acc: false },{ f: 880.00, b: null,   acc: false },
+        { f: 783.99, b: 220.00, acc: true },  { f: 587.33, b: null,   acc: false },
+
+        // Bar 3 - G Major / Village Bounce
+        { f: 659.25, b: 164.81, acc: true },  { f: 783.99, b: null,   acc: false },
+        { f: 1046.50, b: 246.94, acc: false },{ f: 1318.51, b: null,  acc: true },
+        { f: 1174.66, b: 164.81, acc: false },{ f: 1046.50, b: null,  acc: false },
+        { f: 880.00, b: 246.94, acc: true },  { f: 783.99, b: null,   acc: false }
+    ];
+
+    let step = 0;
+
+    bgmTimer = setInterval(() => {
+        if (isSoundMuted || !audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const note = hm16BitMelody[step];
+        play16BitNote(note.f, note.b, note.acc);
+
+        step = (step + 1) % hm16BitMelody.length;
+    }, 180);
+}
+
+function stopBGM() {
+    if (bgmTimer) {
+        clearInterval(bgmTimer);
+        bgmTimer = null;
+    }
+}
+
+function toggleSound() {
+    isSoundMuted = !isSoundMuted;
+    const btn = document.getElementById('btn-sound-toggle');
+    if (isSoundMuted) {
+        btn.innerText = '🔇';
+        stopBGM();
+    } else {
+        btn.innerText = '🔊';
+        startBGM();
+    }
+}
+
+// AUTO-STOP SUARA SAAT APLIKASI DI-CLOSE / DI-MINIMIZE / PINDAH TAB
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopBGM();
+        if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
+    } else {
+        const bumperHidden = document.getElementById('screen-bumper').classList.contains('hidden');
+        if (!isSoundMuted && bumperHidden) {
+            initAudioContext();
+            startBGM();
+        }
+    }
+});
+
+window.addEventListener('pagehide', () => {
+    stopBGM();
+    if (audioCtx) audioCtx.suspend();
+});
+
+// BUTTON CLICK SFX
+function playClickSFX() {
+    if (isSoundMuted) return;
+    try {
+        initAudioContext();
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, now);
+        osc.frequency.exponentialRampToValueAtTime(850, now + 0.04);
+
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.04);
+    } catch (e) {}
+}
+
+// GAMEPLAY SFX
+function playCuteSFX(type) {
+    if (isSoundMuted) return;
+    try {
+        initAudioContext();
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'CORRECT') {
+            const notes = [1046.50, 1318.51, 1567.98, 2093.00];
+            notes.forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now + (index * 0.05));
+                gain.gain.setValueAtTime(0.15, now + (index * 0.05));
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (index * 0.05) + 0.22);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + (index * 0.05));
+                osc.stop(now + (index * 0.05) + 0.22);
+            });
+        } else if (type === 'WRONG') {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.22);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+        } else if (type === 'STAGE_CLEAR') {
+            const fanfareMelody = [
+                { f: 523.25, d: 0.12 }, { f: 659.25, d: 0.12 }, { f: 783.99, d: 0.12 },
+                { f: 1046.50, d: 0.25 }, { f: 880.00, d: 0.12 }, { f: 1046.50, d: 0.40 }
+            ];
+            let elapsed = 0;
+            fanfareMelody.forEach((item) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(item.f, now + elapsed);
+                gain.gain.setValueAtTime(0.22, now + elapsed);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + elapsed + item.d);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + elapsed);
+                osc.stop(now + elapsed + item.d);
+                elapsed += item.d;
+            });
+        }
+    } catch (e) {}
+}
+
+// Phaser Config
 const config = {
     type: Phaser.AUTO,
     parent: 'phaser-canvas-container',
@@ -205,10 +570,19 @@ function updatePhaser() {}
 function showScreen(screenId) {
     document.querySelectorAll('.z-20').forEach(el => el.classList.add('hidden'));
     document.getElementById('modal-stage-clear').classList.add('hidden');
+    
+    if (screenId === 'screen-stage') {
+        renderStageGrid();
+    }
+
     if (screenId) {
         document.getElementById(screenId).classList.remove('hidden');
     }
     if (screenId === 'screen-cover') updateCoverUI();
+}
+
+function goToStageMenuFromModal() {
+    showScreen('screen-stage');
 }
 
 function updateCoverUI() {
@@ -242,7 +616,6 @@ function selectGrade(grade) {
     currentStage = unlockedStages[grade] || 1;
     currentQuestionIndex = 0;
     saveProgress();
-    renderStageGrid();
     showScreen('screen-stage');
 }
 
@@ -269,6 +642,7 @@ function renderStageGrid() {
 
         if (isUnlocked) {
             btn.onclick = () => {
+                playClickSFX();
                 if (currentStage !== i) {
                     currentStage = i;
                     currentQuestionIndex = 0;
@@ -375,6 +749,7 @@ function renderPhaserInteractive(qData) {
         });
 
         container.on('dragend', () => {
+            playClickSFX();
             if (Phaser.Geom.Intersects.RectangleToRectangle(container.getBounds(), phaserDropZone.getBounds())) {
                 container.x = 190;
                 container.y = 55;
@@ -393,16 +768,19 @@ function renderPhaserInteractive(qData) {
 }
 
 function verifyAnswerHTML() {
+    playClickSFX();
     const toast = document.getElementById('feedback-toast');
 
     if (!phaserSelectedValue) {
-        showToast('⚠️ Taruh jawaban di kotak dulu ya!', 'border-amber-400 text-amber-900 bg-amber-50');
+        showCuteToast('INFO', 'PILIH JAWABAN DULU YA!', 'Tarik salah satu kotak ke atas');
+        playCuteSFX('WRONG');
         return;
     }
 
     if (phaserSelectedValue.toString() === currentQData.target.toString()) {
         score += 10;
-        showToast('🎉 BENAR! Pintar Banget!', 'border-emerald-500 text-emerald-900 bg-emerald-50');
+        playCuteSFX('CORRECT');
+        showCuteToast('CORRECT', 'JAWABAN BENAR! PINTAR!', 'Dapat +10 Bintang ⭐');
 
         currentQuestionIndex++;
         
@@ -417,6 +795,7 @@ function verifyAnswerHTML() {
 
             setTimeout(() => {
                 toast.classList.add('hidden');
+                playCuteSFX('STAGE_CLEAR');
                 showStageClearModal(completedStage);
             }, 1000);
         } else {
@@ -428,7 +807,8 @@ function verifyAnswerHTML() {
         }
 
     } else {
-        showToast('❌ SALAH! Coba lagi yuk!', 'border-rose-500 text-rose-900 bg-rose-50');
+        playCuteSFX('WRONG');
+        showCuteToast('WRONG', 'YAH, HAMPIR BENAR!', 'Yuk coba dipikirkan lagi 🤗');
 
         if (phaserPlacedContainer) {
             phaserScene.tweens.add({
@@ -441,8 +821,44 @@ function verifyAnswerHTML() {
             phaserSelectedValue = null;
         }
 
-        setTimeout(() => toast.classList.add('hidden'), 1500);
+        setTimeout(() => toast.classList.add('hidden'), 1400);
     }
+}
+
+function showCuteToast(type, title, subtitle) {
+    const toast = document.getElementById('feedback-toast');
+    const iconBg = document.getElementById('toast-icon-bg');
+    const titleEl = document.getElementById('toast-title');
+    const subEl = document.getElementById('toast-sub');
+    const badgeEl = document.getElementById('toast-badge');
+
+    if (type === 'CORRECT') {
+        toast.className = 'absolute top-4 inset-x-4 z-30 bg-emerald-50/95 border-2 border-emerald-400 p-3.5 rounded-2xl shadow-xl pop-in flex items-center justify-between';
+        iconBg.className = 'w-10 h-10 bg-emerald-400 text-white rounded-xl flex items-center justify-center text-xl shadow-inner';
+        iconBg.innerText = '🎉';
+        titleEl.className = 'text-sm font-black text-emerald-950 tracking-tight';
+        titleEl.innerText = title;
+        subEl.innerText = subtitle;
+        badgeEl.innerText = '✨';
+    } else if (type === 'WRONG') {
+        toast.className = 'absolute top-4 inset-x-4 z-30 bg-rose-50/95 border-2 border-rose-300 p-3.5 rounded-2xl shadow-xl pop-in flex items-center justify-between';
+        iconBg.className = 'w-10 h-10 bg-rose-400 text-white rounded-xl flex items-center justify-center text-xl shadow-inner';
+        iconBg.innerText = '🎈';
+        titleEl.className = 'text-sm font-black text-rose-950 tracking-tight';
+        titleEl.innerText = title;
+        subEl.innerText = subtitle;
+        badgeEl.innerText = '💡';
+    } else {
+        toast.className = 'absolute top-4 inset-x-4 z-30 bg-amber-50/95 border-2 border-amber-300 p-3.5 rounded-2xl shadow-xl pop-in flex items-center justify-between';
+        iconBg.className = 'w-10 h-10 bg-amber-400 text-white rounded-xl flex items-center justify-center text-xl shadow-inner';
+        iconBg.innerText = '💡';
+        titleEl.className = 'text-sm font-black text-amber-950 tracking-tight';
+        titleEl.innerText = title;
+        subEl.innerText = subtitle;
+        badgeEl.innerText = '👇';
+    }
+
+    toast.classList.remove('hidden');
 }
 
 function showStageClearModal(completedStage) {
@@ -452,6 +868,7 @@ function showStageClearModal(completedStage) {
     if (completedStage < 10) {
         nextBtn.innerText = `LANJUT KE STAGE ${completedStage + 1} ▶`;
         nextBtn.onclick = () => {
+            playClickSFX();
             currentStage = completedStage + 1;
             currentQuestionIndex = 0;
             saveProgress();
@@ -461,6 +878,7 @@ function showStageClearModal(completedStage) {
     } else {
         nextBtn.innerText = `SELAMAT! KAMU JUARA COC 👑`;
         nextBtn.onclick = () => {
+            playClickSFX();
             document.getElementById('modal-stage-clear').classList.add('hidden');
             showScreen('screen-stage');
         };
@@ -477,13 +895,6 @@ function goToNextStage() {
         document.getElementById('modal-stage-clear').classList.add('hidden');
         startQuestion();
     }
-}
-
-function showToast(msg, classes) {
-    const toast = document.getElementById('feedback-toast');
-    toast.className = `absolute top-2 border-2 px-4 py-2 rounded-xl text-xs font-black shadow-xl pop-in ${classes}`;
-    toast.innerText = msg;
-    toast.classList.remove('hidden');
 }
 
 // Curriculum Generator
@@ -618,9 +1029,6 @@ function generateUniqueOptions(correct) {
 function shuffle(array) {
     return array.sort(() => Math.random() - 0.5);
 }
-
-// Initial Run
-updateCoverUI();
 </script>
 
 </body>
