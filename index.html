@@ -2,13 +2,24 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Little Champion</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; touch-action: none; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            touch-action: none;
+            /* Support Safe Area Inset Notch iPhone/Android */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        /* Fallback Cross-Browser Height */
+        .app-viewport {
+            height: 100vh; /* Fallback Browser Lama */
+            height: 100dvh; /* Dynamic Viewport Modern Browser */
+        }
         .btn-3d { transition: all 0.1s ease; }
         .btn-3d:active { transform: translateY(4px); box-shadow: none !important; }
         .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -19,122 +30,146 @@
         .float-anim { animation: floatAnim 3s ease-in-out infinite; }
         @keyframes floatAnim {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-8px) rotate(3deg); }
+            50% { transform: translateY(-6px) rotate(3deg); }
         }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-2 select-none overflow-hidden">
+<body class="bg-slate-100 app-viewport w-screen flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
 
-  <div class="relative w-full max-w-[420px] h-[720px] bg-white rounded-[32px] border-4 border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between">
+  <div class="relative w-full max-w-[420px] h-full md:max-h-[750px] bg-white md:rounded-[32px] border-0 md:border-4 border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between">
     
-    <div id="screen-cover" class="absolute inset-0 z-20 bg-gradient-to-b from-amber-50 via-sky-50 to-white p-6 flex flex-col justify-between items-center text-center pop-in">
-      <div class="w-full pt-4">
-        <div class="inline-flex items-center gap-1.5 bg-yellow-300/80 backdrop-blur-sm text-amber-950 text-xs font-black px-4 py-1.5 rounded-full border border-yellow-400 shadow-sm mb-3">
+    <div id="screen-cover" class="absolute inset-0 z-20 bg-gradient-to-b from-amber-50 via-sky-50 to-white p-5 flex flex-col justify-between items-center text-center pop-in overflow-y-auto">
+      
+      <div class="w-full pt-2">
+        <div class="inline-flex items-center gap-1.5 bg-yellow-300/80 backdrop-blur-sm text-amber-950 text-[11px] font-black px-3.5 py-1 rounded-full border border-yellow-400 shadow-sm mb-2">
           <span>✨</span> COC KIDS ACADEMY <span>✨</span>
         </div>
-        <h1 class="text-3xl font-black text-slate-800 tracking-tight drop-shadow-sm">LITTLE CHAMPION</h1>
-        <p class="text-xs font-extrabold text-amber-700/80 mt-1 uppercase tracking-wider">Belajar Seru & Asah Logika</p>
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight drop-shadow-sm">LITTLE CHAMPION</h1>
+        <p class="text-[11px] font-extrabold text-amber-700/80 mt-0.5 uppercase tracking-wider">Belajar Seru & Asah Logika</p>
       </div>
 
-      <div class="my-auto py-4 relative w-full flex items-center justify-center">
-        <div class="absolute w-52 h-52 bg-yellow-200/50 rounded-full blur-2xl"></div>
-        <div class="absolute top-0 left-4 bg-white p-3 rounded-2xl shadow-lg border-2 border-amber-200 float-anim text-2xl">🧩</div>
-        <div class="absolute bottom-2 right-4 bg-white p-3 rounded-2xl shadow-lg border-2 border-sky-200 float-anim text-2xl" style="animation-delay: 1.5s;">🚀</div>
-        <div class="absolute top-6 right-6 bg-white px-3 py-1.5 rounded-xl shadow-md border border-emerald-200 text-xs font-black text-emerald-700">⭐ 100+ Soal</div>
+      <div class="my-auto py-2 relative w-full flex items-center justify-center min-h-[160px]">
+        <div class="absolute w-44 h-44 bg-yellow-200/50 rounded-full blur-xl"></div>
+        <div class="absolute top-0 left-6 bg-white p-2.5 rounded-2xl shadow-md border border-amber-200 float-anim text-xl">🧩</div>
+        <div class="absolute bottom-0 right-6 bg-white p-2.5 rounded-2xl shadow-md border border-sky-200 float-anim text-xl" style="animation-delay: 1.5s;">🚀</div>
+        <div class="absolute top-2 right-4 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-emerald-200 text-[10px] font-black text-emerald-700">⭐ 100+ Soal</div>
 
-        <div class="w-40 h-40 bg-gradient-to-tr from-yellow-400 to-amber-300 rounded-[36px] flex flex-col items-center justify-center shadow-xl border-4 border-white relative z-10 transform rotate-3">
-          <div class="text-7xl drop-shadow-md">🐱</div>
-          <div class="bg-amber-900 text-yellow-200 text-[10px] font-black px-2 py-0.5 rounded-md mt-1">SUPER KIDS</div>
+        <div class="w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-tr from-yellow-400 to-amber-300 rounded-[30px] flex flex-col items-center justify-center shadow-lg border-4 border-white relative z-10 transform rotate-3">
+          <div class="text-6xl sm:text-7xl drop-shadow-md">🐱</div>
+          <div class="bg-amber-900 text-yellow-200 text-[9px] font-black px-2 py-0.5 rounded-md mt-0.5">SUPER KIDS</div>
         </div>
       </div>
 
-      <div class="w-full space-y-3 pb-3">
-        <button id="btn-start" onclick="handleStartBtn()" class="btn-3d w-full py-4 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-base rounded-2xl shadow-[0_6px_0_#d97706] tracking-wide">
+      <div class="w-full space-y-2.5 pb-2">
+        <button id="btn-start" onclick="handleStartBtn()" class="btn-3d w-full py-3.5 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-base rounded-2xl shadow-[0_5px_0_#d97706] tracking-wide">
           MULAI MAIN ▶
         </button>
-        <button id="btn-reset" onclick="resetProgress()" class="hidden btn-3d w-full py-3 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-500 font-bold text-xs rounded-2xl shadow-[0_4px_0_#e2e8f0]">
+        <button id="btn-reset" onclick="resetProgress()" class="hidden btn-3d w-full py-2.5 bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-500 font-bold text-xs rounded-2xl shadow-[0_3px_0_#e2e8f0]">
           Mulai Dari Awal 🔄
         </button>
       </div>
     </div>
 
-    <div id="screen-grade" class="absolute inset-0 z-20 bg-white p-6 flex flex-col justify-between hidden pop-in">
+    <div id="screen-grade" class="absolute inset-0 z-20 bg-white p-5 flex flex-col justify-between hidden pop-in">
       <div>
-        <div class="flex items-center justify-between mb-6">
-          <button onclick="showScreen('screen-cover')" class="w-10 h-10 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200">⬅️</button>
-          <h2 class="text-xl font-black text-slate-800">Pilih Tingkatan</h2>
-          <div class="w-10"></div>
+        <div class="flex items-center justify-between mb-4">
+          <button onclick="showScreen('screen-cover')" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
+          <h2 class="text-lg font-black text-slate-800">Pilih Tingkatan</h2>
+          <div class="w-9"></div>
         </div>
         
-        <div class="space-y-4">
-          <button onclick="selectGrade('TK-A')" class="btn-3d w-full p-4 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-left flex items-center justify-between shadow-[0_5px_0_#eab308]">
+        <div class="space-y-3">
+          <button onclick="selectGrade('TK-A')" class="btn-3d w-full p-3.5 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#eab308]">
             <div>
-              <div class="font-black text-yellow-900 text-lg">TK-A (3-4 Tahun) 🐥</div>
-              <div class="text-xs font-bold text-yellow-700">Hitung benda & pola sederhana</div>
+              <div class="font-black text-yellow-900 text-base">TK-A (3-4 Tahun) 🐥</div>
+              <div class="text-[11px] font-bold text-yellow-700">Hitung benda & pola sederhana</div>
             </div>
-            <span class="text-2xl">➔</span>
+            <span class="text-xl">➔</span>
           </button>
 
-          <button onclick="selectGrade('TK-B')" class="btn-3d w-full p-4 bg-sky-100 border-2 border-sky-400 rounded-2xl text-left flex items-center justify-between shadow-[0_5px_0_#0284c7]">
+          <button onclick="selectGrade('TK-B')" class="btn-3d w-full p-3.5 bg-sky-100 border-2 border-sky-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#0284c7]">
             <div>
-              <div class="font-black text-sky-900 text-lg">TK-B (5-6 Tahun) 🦊</div>
-              <div class="text-xs font-bold text-sky-700">Penjumlahan & Phonics A-Z</div>
+              <div class="font-black text-sky-900 text-base">TK-B (5-6 Tahun) 🦊</div>
+              <div class="text-[11px] font-bold text-sky-700">Penjumlahan & Phonics A-Z</div>
             </div>
-            <span class="text-2xl">➔</span>
+            <span class="text-xl">➔</span>
           </button>
 
-          <button onclick="selectGrade('SD-1')" class="btn-3d w-full p-4 bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left flex items-center justify-between shadow-[0_5px_0_#16a34a]">
+          <button onclick="selectGrade('SD-1')" class="btn-3d w-full p-3.5 bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#16a34a]">
             <div>
-              <div class="font-black text-emerald-900 text-lg">SD Kelas 1 (COC) 🦁</div>
-              <div class="text-xs font-bold text-emerald-700">Matematika belasan & eja kata</div>
+              <div class="font-black text-emerald-900 text-base">SD Kelas 1 (COC) 🦁</div>
+              <div class="text-[11px] font-bold text-emerald-700">Matematika belasan & eja kata</div>
             </div>
-            <span class="text-2xl">➔</span>
+            <span class="text-xl">➔</span>
           </button>
         </div>
       </div>
     </div>
 
-    <div id="screen-stage" class="absolute inset-0 z-20 bg-white p-6 flex flex-col hidden pop-in">
-      <div class="flex items-center justify-between mb-4">
-        <button onclick="showScreen('screen-grade')" class="w-10 h-10 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200">⬅️</button>
-        <h2 id="stage-title" class="text-lg font-black text-slate-800">Stage TK-A</h2>
-        <div class="w-10"></div>
+    <div id="screen-stage" class="absolute inset-0 z-20 bg-white p-5 flex flex-col hidden pop-in">
+      <div class="flex items-center justify-between mb-3">
+        <button onclick="showScreen('screen-grade')" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
+        <h2 id="stage-title" class="text-base font-black text-slate-800">Stage TK-A</h2>
+        <div class="w-9"></div>
       </div>
 
-      <div id="stage-grid" class="grid grid-cols-2 gap-3 overflow-y-auto pb-4">
+      <div id="stage-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto pb-4">
         </div>
     </div>
 
-    <div id="hud-bar" class="p-4 flex justify-between items-center border-b border-slate-100 z-10 bg-white">
-      <button onclick="showScreen('screen-stage')" class="w-10 h-10 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">🏠</button>
-      <div class="flex items-center space-x-2">
-        <span class="text-yellow-500 font-black text-lg">⭐ <span id="txt-score">0</span></span>
-      </div>
-      <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 text-xs font-extrabold px-3 py-1 rounded-full" id="txt-progress">
-        1/10
+    <div id="modal-stage-clear" class="absolute inset-0 z-30 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-5 hidden pop-in">
+      <div class="bg-white rounded-[24px] border-4 border-amber-300 p-5 w-full text-center shadow-2xl space-y-3">
+        <div class="text-5xl animate-bounce">🏆</div>
+        <div>
+          <h3 id="modal-clear-title" class="text-xl font-black text-slate-800">STAGE 1 SELESAI!</h3>
+          <p class="text-[11px] font-bold text-slate-400 mt-0.5">Kamu berhasil menyelesaikan semua soal!</p>
+        </div>
+
+        <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl flex items-center justify-center space-x-2">
+          <span class="text-yellow-600 text-base font-black">⭐ +100 Bintang</span>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <button id="btn-next-stage" onclick="goToNextStage()" class="btn-3d w-full py-3 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-sm rounded-xl shadow-[0_4px_0_#d97706]">
+            LANJUT KE STAGE 2 ▶
+          </button>
+          <button onclick="showScreen('screen-stage')" class="btn-3d w-full py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-600 font-bold text-xs rounded-xl shadow-[0_3px_0_#cbd5e1]">
+            Kembali ke Pilih Stage 🗺️
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="px-4 pt-3 text-center z-10 bg-white">
-      <span id="q-title" class="inline-block bg-slate-100 text-slate-700 text-xs font-black px-3 py-1 rounded-lg border border-slate-200">
+    <div id="hud-bar" class="p-3 flex justify-between items-center border-b border-slate-100 z-10 bg-white">
+      <button onclick="showScreen('screen-stage')" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-xs">🏠</button>
+      <div class="flex items-center space-x-1">
+        <span class="text-yellow-500 font-black text-base">⭐ <span id="txt-score">0</span></span>
+      </div>
+      <div class="bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-black px-2.5 py-1 rounded-full" id="txt-progress">
+        STAGE 1 (1/10)
+      </div>
+    </div>
+
+    <div class="px-3 pt-2 text-center z-10 bg-white">
+      <span id="q-title" class="inline-block bg-slate-100 text-slate-700 text-[10px] font-black px-2.5 py-0.5 rounded-md border border-slate-200">
         PENJUMLAHAN
       </span>
-      <h3 id="q-sub" class="text-sm font-bold text-slate-400 mt-1">Hitung hasil penjumlahan berikut:</h3>
+      <h3 id="q-sub" class="text-xs font-bold text-slate-400 mt-0.5">Hitung hasil penjumlahan berikut:</h3>
       
-      <div id="q-box" class="mt-3 p-4 bg-sky-50 border-2 border-sky-300 rounded-2xl text-2xl font-black text-sky-800 shadow-sm">
+      <div id="q-box" class="mt-2 p-3 bg-sky-50 border-2 border-sky-300 rounded-xl text-xl font-black text-sky-800 shadow-xs">
         2 + 3 = ?
       </div>
     </div>
 
-    <div class="relative flex-1 w-full bg-slate-50 flex items-center justify-center">
-      <div id="phaser-canvas-container" class="w-full h-full"></div>
-      <div id="feedback-toast" class="hidden absolute top-2 bg-white border-2 px-5 py-2.5 rounded-2xl text-sm font-black shadow-xl pop-in">
+    <div class="relative flex-1 w-full bg-slate-50 flex items-center justify-center overflow-hidden">
+      <div id="phaser-canvas-container" class="w-full h-full flex items-center justify-center"></div>
+      <div id="feedback-toast" class="hidden absolute top-2 bg-white border-2 px-4 py-2 rounded-xl text-xs font-black shadow-lg pop-in">
         🎉 BENAR! Pintar Banget!
       </div>
     </div>
 
-    <div class="p-4 bg-white border-t border-slate-100 z-10">
-      <button id="btn-check" onclick="verifyAnswerHTML()" class="btn-3d w-full py-4 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-lg rounded-2xl shadow-[0_5px_0_#d97706]">
+    <div class="p-3 bg-white border-t border-slate-100 z-10 pb-4">
+      <button id="btn-check" onclick="verifyAnswerHTML()" class="btn-3d w-full py-3.5 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-base rounded-2xl shadow-[0_4px_0_#d97706]">
         CEK JAWABAN ✓
       </button>
     </div>
@@ -152,12 +187,12 @@ let unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1 };
 let currentQData = null;
 let phaserScene = null;
 
-// Phaser Config
+// Phaser Config Dynamic Canvas
 const config = {
     type: Phaser.AUTO,
     parent: 'phaser-canvas-container',
     width: 380,
-    height: 280,
+    height: 240,
     transparent: true,
     scene: { create: createPhaser, update: updatePhaser }
 };
@@ -169,6 +204,7 @@ function updatePhaser() {}
 
 function showScreen(screenId) {
     document.querySelectorAll('.z-20').forEach(el => el.classList.add('hidden'));
+    document.getElementById('modal-stage-clear').classList.add('hidden');
     if (screenId) {
         document.getElementById(screenId).classList.remove('hidden');
     }
@@ -182,7 +218,6 @@ function updateCoverUI() {
     const btnReset = document.getElementById('btn-reset');
 
     if (hasSave) {
-        // Tampilkan Stage & Nomor Soal Persis yang Terakhir Dikerjakan
         btnStart.innerText = `LANJUT BELAJAR (Stg ${currentStage} - Soal ${currentQuestionIndex + 1}/10) ▶`;
         btnReset.classList.remove('hidden');
     } else {
@@ -195,7 +230,7 @@ function handleStartBtn() {
     loadSaveData();
     const hasSave = (localStorage.getItem('LITTLE_CHAMPION_SAVE') !== null);
     if (hasSave) {
-        showScreen(null); // Langsung masuk game tanpa riset index soal
+        showScreen(null);
         startQuestion();
     } else {
         showScreen('screen-grade');
@@ -205,7 +240,7 @@ function handleStartBtn() {
 function selectGrade(grade) {
     selectedGrade = grade;
     currentStage = unlockedStages[grade] || 1;
-    currentQuestionIndex = 0; // Riset cuma kalo ganti grade baru
+    currentQuestionIndex = 0;
     saveProgress();
     renderStageGrid();
     showScreen('screen-stage');
@@ -221,20 +256,19 @@ function renderStageGrid() {
     for (let i = 1; i <= 10; i++) {
         const isUnlocked = i <= maxUnlocked;
         const btn = document.createElement('button');
-        btn.className = `btn-3d p-4 rounded-2xl border-2 font-black text-left flex flex-col justify-between h-24 ${
+        btn.className = `btn-3d p-3 rounded-xl border-2 font-black text-left flex flex-col justify-between h-20 ${
             isUnlocked 
-            ? 'bg-sky-100 border-sky-400 text-sky-900 shadow-[0_4px_0_#0284c7]' 
-            : 'bg-slate-100 border-slate-300 text-slate-400 shadow-[0_4px_0_#cbd5e1]'
+            ? 'bg-sky-100 border-sky-400 text-sky-900 shadow-[0_3px_0_#0284c7]' 
+            : 'bg-slate-100 border-slate-300 text-slate-400 shadow-[0_3px_0_#cbd5e1]'
         }`;
         
         btn.innerHTML = `
-            <span class="text-xs font-bold">${isUnlocked ? 'STAGE' : 'LOCKED'}</span>
-            <span class="text-xl font-black">${isUnlocked ? i + ' ⭐' : '🔒 ' + i}</span>
+            <span class="text-[10px] font-bold">${isUnlocked ? 'STAGE' : 'LOCKED'}</span>
+            <span class="text-base font-black">${isUnlocked ? i + ' ⭐' : '🔒 ' + i}</span>
         `;
 
         if (isUnlocked) {
             btn.onclick = () => {
-                // Kalo milih stage dari grid, kalau stage-nya sama pake saved question index, kalo stage beda riset ke soal 1
                 if (currentStage !== i) {
                     currentStage = i;
                     currentQuestionIndex = 0;
@@ -256,14 +290,9 @@ function resetProgress() {
     showScreen('screen-grade');
 }
 
-// System Auto-Save Persis Per-Soal
 function saveProgress() {
     localStorage.setItem('LITTLE_CHAMPION_SAVE', JSON.stringify({
-        selectedGrade, 
-        currentStage, 
-        currentQuestionIndex, 
-        score, 
-        unlockedStages
+        selectedGrade, currentStage, currentQuestionIndex, score, unlockedStages
     }));
 }
 
@@ -283,7 +312,7 @@ function loadSaveData() {
 
 function startQuestion() {
     document.getElementById('txt-score').innerText = score;
-    document.getElementById('txt-progress').innerText = `${currentQuestionIndex + 1}/10`;
+    document.getElementById('txt-progress').innerText = `STAGE ${currentStage} (${currentQuestionIndex + 1}/10)`;
 
     currentQData = generateCurriculumQuestion(selectedGrade, currentStage, currentQuestionIndex);
 
@@ -306,20 +335,20 @@ function renderPhaserInteractive(qData) {
 
     let dropBoxG = phaserScene.add.graphics();
     dropBoxG.fillStyle(0xffffff, 1);
-    dropBoxG.fillRoundedRect(40, 20, 300, 90, 16);
+    dropBoxG.fillRoundedRect(40, 15, 300, 80, 14);
     dropBoxG.lineStyle(2, 0xcbd5e1, 1);
-    dropBoxG.strokeRoundedRect(40, 20, 300, 90, 16);
+    dropBoxG.strokeRoundedRect(40, 15, 300, 80, 14);
 
-    let dropHint = phaserScene.add.text(190, 65, 'Taruh jawaban di sini', { font: '700 14px sans-serif', fill: '#94a3b8' }).setOrigin(0.5);
+    let dropHint = phaserScene.add.text(190, 55, 'Taruh jawaban di sini', { font: '700 13px sans-serif', fill: '#94a3b8' }).setOrigin(0.5);
 
-    phaserDropZone = phaserScene.add.rectangle(190, 65, 300, 90);
+    phaserDropZone = phaserScene.add.rectangle(190, 55, 300, 80);
     phaserDropZone.isTarget = qData.target;
 
     qData.options.forEach((opt, idx) => {
         let total = qData.options.length;
         let startX = 190 - ((total - 1) * 55);
         let posX = startX + (idx * 110);
-        let posY = 200;
+        let posY = 175;
 
         let container = phaserScene.add.container(posX, posY);
         container.origX = posX;
@@ -327,14 +356,14 @@ function renderPhaserInteractive(qData) {
 
         let bgG = phaserScene.add.graphics();
         bgG.fillStyle(0xffffff, 1);
-        bgG.fillRoundedRect(-40, -30, 80, 60, 14);
-        bgG.lineStyle(3, 0xe2e8f0, 1);
-        bgG.strokeRoundedRect(-40, -30, 80, 60, 14);
+        bgG.fillRoundedRect(-38, -26, 76, 52, 12);
+        bgG.lineStyle(2, 0xe2e8f0, 1);
+        bgG.strokeRoundedRect(-38, -26, 76, 52, 12);
 
-        let txt = phaserScene.add.text(0, 0, opt.toString(), { font: '800 20px sans-serif', fill: '#1e293b' }).setOrigin(0.5);
+        let txt = phaserScene.add.text(0, 0, opt.toString(), { font: '800 18px sans-serif', fill: '#1e293b' }).setOrigin(0.5);
 
         container.add([bgG, txt]);
-        container.setSize(80, 60);
+        container.setSize(76, 52);
         container.value = opt;
 
         container.setInteractive();
@@ -348,7 +377,7 @@ function renderPhaserInteractive(qData) {
         container.on('dragend', () => {
             if (Phaser.Geom.Intersects.RectangleToRectangle(container.getBounds(), phaserDropZone.getBounds())) {
                 container.x = 190;
-                container.y = 65;
+                container.y = 55;
                 phaserSelectedValue = container.value;
                 phaserPlacedContainer = container;
             } else {
@@ -377,20 +406,21 @@ function verifyAnswerHTML() {
 
         currentQuestionIndex++;
         
-        // Cek Apakah Stage Selesai
         if (currentQuestionIndex >= 10) {
-            currentQuestionIndex = 0; // Riset ke 0 buat stage baru
+            let completedStage = currentStage;
+            currentQuestionIndex = 0;
+
             if (currentStage === unlockedStages[selectedGrade] && unlockedStages[selectedGrade] < 10) {
                 unlockedStages[selectedGrade]++;
             }
             saveProgress();
+
             setTimeout(() => {
                 toast.classList.add('hidden');
-                renderStageGrid();
-                showScreen('screen-stage');
-            }, 1200);
+                showStageClearModal(completedStage);
+            }, 1000);
         } else {
-            saveProgress(); // Simpan index soal nomor baru
+            saveProgress();
             setTimeout(() => {
                 toast.classList.add('hidden');
                 startQuestion();
@@ -415,9 +445,43 @@ function verifyAnswerHTML() {
     }
 }
 
+function showStageClearModal(completedStage) {
+    document.getElementById('modal-clear-title').innerText = `STAGE ${completedStage} SELESAI!`;
+    const nextBtn = document.getElementById('btn-next-stage');
+
+    if (completedStage < 10) {
+        nextBtn.innerText = `LANJUT KE STAGE ${completedStage + 1} ▶`;
+        nextBtn.onclick = () => {
+            currentStage = completedStage + 1;
+            currentQuestionIndex = 0;
+            saveProgress();
+            document.getElementById('modal-stage-clear').classList.add('hidden');
+            startQuestion();
+        };
+    } else {
+        nextBtn.innerText = `SELAMAT! KAMU JUARA COC 👑`;
+        nextBtn.onclick = () => {
+            document.getElementById('modal-stage-clear').classList.add('hidden');
+            showScreen('screen-stage');
+        };
+    }
+
+    document.getElementById('modal-stage-clear').classList.remove('hidden');
+}
+
+function goToNextStage() {
+    if (currentStage < 10) {
+        currentStage++;
+        currentQuestionIndex = 0;
+        saveProgress();
+        document.getElementById('modal-stage-clear').classList.add('hidden');
+        startQuestion();
+    }
+}
+
 function showToast(msg, classes) {
     const toast = document.getElementById('feedback-toast');
-    toast.className = `absolute top-2 border-2 px-5 py-2.5 rounded-2xl text-sm font-black shadow-xl pop-in ${classes}`;
+    toast.className = `absolute top-2 border-2 px-4 py-2 rounded-xl text-xs font-black shadow-xl pop-in ${classes}`;
     toast.innerText = msg;
     toast.classList.remove('hidden');
 }
