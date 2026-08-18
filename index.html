@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Little Champion - Cambridge & COC Prep</title>
+    <title>Little Champion</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
             width: 100%; height: 100%;
-            background-color: #4c1d95; /* Ungu Ceria */
+            background-color: #4c1d95;
             display: flex; justify-content: center; align-items: center;
             overflow: hidden; touch-action: none;
         }
@@ -39,7 +39,7 @@ const config = {
 
 const game = new Phaser.Game(config);
 
-// State Global Progress
+// State Global & System Save Data
 let selectedGrade = 'TK-A';
 let currentStage = 1;
 let currentQuestionIndex = 0; // 0-9
@@ -52,6 +52,36 @@ let unlockedStages = {
 };
 
 let uiGroup, gameGroup, dropZone;
+
+// Load Progress dari Browser Storage
+loadSaveData();
+
+function saveProgress() {
+    const saveData = {
+        selectedGrade,
+        currentStage,
+        currentQuestionIndex,
+        score,
+        unlockedStages
+    };
+    localStorage.setItem('LITTLE_CHAMPION_SAVE', JSON.stringify(saveData));
+}
+
+function loadSaveData() {
+    const saved = localStorage.getItem('LITTLE_CHAMPION_SAVE');
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            selectedGrade = data.selectedGrade || 'TK-A';
+            currentStage = data.currentStage || 1;
+            currentQuestionIndex = data.currentQuestionIndex || 0;
+            score = data.score || 0;
+            unlockedStages = data.unlockedStages || unlockedStages;
+        } catch (e) {
+            console.log("Error loading save");
+        }
+    }
+}
 
 function preload() {}
 function create() {
@@ -68,33 +98,55 @@ function clearScreen(scene) {
 }
 
 /* ==========================================
-   1. COVER SCREEN (Lucu & Playful)
+   1. COVER SCREEN (High Contrast & Clean)
    ========================================== */
 function showCoverScreen(scene) {
     clearScreen(scene);
 
-    // Card Utama dengan Border Tebal Kuning Kartun
     let bg = scene.add.rectangle(200, 350, 370, 660, 0xfffbebe).setStrokeStyle(6, 0xfacc15);
-    let headerBg = scene.add.rectangle(200, 140, 330, 140, 0xec4899).setStrokeStyle(4, 0xbe185d);
+    let headerBg = scene.add.rectangle(200, 150, 330, 130, 0xfde047).setStrokeStyle(4, 0xca8a04);
 
-    let titleIcon = scene.add.text(200, 100, '👑', { font: '75px Arial' }).setOrigin(0.5);
-    let title1 = scene.add.text(200, 160, 'LITTLE CHAMPION', { font: '900 24px Arial', fill: '#ffffff' }).setOrigin(0.5);
-    let title2 = scene.add.text(200, 240, ' Cambridge Standard', { font: 'bold 18px Arial', fill: '#7c3aed', backgroundColor: '#fef08a', padding: { x: 10, y: 5 } }).setOrigin(0.5);
+    let titleIcon = scene.add.text(200, 110, '👑', { font: '75px Arial' }).setOrigin(0.5);
     
-    // Dekorasi Emoji Lucu
-    let deco1 = scene.add.text(60, 330, '🎨', { font: '55px Arial' }).setOrigin(0.5);
-    let deco2 = scene.add.text(200, 330, '🚀', { font: '60px Arial' }).setOrigin(0.5);
-    let deco3 = scene.add.text(340, 330, '🧩', { font: '55px Arial' }).setOrigin(0.5);
-
-    // Tombol Start Hijau Ceria
-    let btnBg = scene.add.rectangle(200, 490, 260, 80, 0x22c55e).setInteractive().setStrokeStyle(5, 0x15803d);
-    let btnTxt = scene.add.text(200, 490, 'MAIN YUK! ▶', { font: '900 26px Arial', fill: '#ffffff' }).setOrigin(0.5);
+    // Teks Hitam / Purple Tua di atas background Cream/Kuning (Kontras Tinggi)
+    let title1 = scene.add.text(200, 175, 'LITTLE CHAMPION', { font: '900 24px Arial', fill: '#3b0764' }).setOrigin(0.5);
     
-    uiGroup.addMultiple([bg, headerBg, titleIcon, title1, title2, deco1, deco2, deco3, btnBg, btnTxt]);
+    let deco1 = scene.add.text(70, 320, '🎨', { font: '55px Arial' }).setOrigin(0.5);
+    let deco2 = scene.add.text(200, 320, '🚀', { font: '60px Arial' }).setOrigin(0.5);
+    let deco3 = scene.add.text(330, 320, '🧩', { font: '55px Arial' }).setOrigin(0.5);
 
-    btnBg.on('pointerdown', () => {
-        speakAudio("Pilih kelas kamu ya!");
-        showGradeSelectScreen(scene);
+    // Tombol Main Baru vs Lanjut Main
+    let hasSave = localStorage.getItem('LITTLE_CHAMPION_SAVE') !== null;
+    
+    let btnStartBg = scene.add.rectangle(200, 450, 270, 70, 0x22c55e).setInteractive().setStrokeStyle(5, 0x15803d);
+    let btnStartTxt = scene.add.text(200, 450, hasSave ? 'LANJUT MAIN ▶' : 'MAIN YUK! ▶', { font: '900 22px Arial', fill: '#ffffff' }).setOrigin(0.5);
+
+    uiGroup.addMultiple([bg, headerBg, titleIcon, title1, deco1, deco2, deco3, btnStartBg, btnStartTxt]);
+
+    if (hasSave) {
+        let btnResetBg = scene.add.rectangle(200, 540, 270, 50, 0xf87171).setInteractive().setStrokeStyle(3, 0xb91c1c);
+        let btnResetTxt = scene.add.text(200, 540, 'Ulang Dari Awal 🔄', { font: 'bold 16px Arial', fill: '#ffffff' }).setOrigin(0.5);
+        uiGroup.addMultiple([btnResetBg, btnResetTxt]);
+
+        btnResetBg.on('pointerdown', () => {
+            localStorage.removeItem('LITTLE_CHAMPION_SAVE');
+            selectedGrade = 'TK-A';
+            currentStage = 1;
+            currentQuestionIndex = 0;
+            score = 0;
+            unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1 };
+            showGradeSelectScreen(scene);
+        });
+    }
+
+    btnStartBg.on('pointerdown', () => {
+        if (hasSave) {
+            speakAudio(`Lanjut Stage ${currentStage}!`);
+            startQuestion(scene);
+        } else {
+            speakAudio("Pilih kelas kamu ya!");
+            showGradeSelectScreen(scene);
+        }
     });
 }
 
@@ -105,7 +157,9 @@ function showGradeSelectScreen(scene) {
     clearScreen(scene);
 
     let bg = scene.add.rectangle(200, 350, 370, 660, 0xfffbebe).setStrokeStyle(6, 0xfacc15);
-    let title = scene.add.text(200, 75, 'Pilih Kelas Kamu 🎈', { font: '900 24px Arial', fill: '#4c1d95' }).setOrigin(0.5);
+    
+    // Teks Gelap di Atas Background Cream
+    let title = scene.add.text(200, 75, 'Pilih Kelas Kamu 🎈', { font: '900 24px Arial', fill: '#3b0764' }).setOrigin(0.5);
     
     let homeBtn = scene.add.text(45, 45, '🏠', { font: '34px Arial' }).setInteractive();
     homeBtn.on('pointerdown', () => showCoverScreen(scene));
@@ -113,18 +167,19 @@ function showGradeSelectScreen(scene) {
     uiGroup.addMultiple([bg, title, homeBtn]);
 
     const grades = [
-        { name: 'TK-A (3-4 Thn) 🐥', code: 'TK-A', color: 0xfacc15, border: 0xca8a04 },
-        { name: 'TK-B (5-6 Thn) 🦊', code: 'TK-B', color: 0x38bdf8, border: 0x0284c7 },
-        { name: 'SD Kelas 1 🦁', code: 'SD-1', color: 0x4ade80, border: 0x15803d }
+        { name: 'TK-A (3-4 Thn) 🐥', code: 'TK-A', color: 0xfacc15, border: 0xca8a04, textColor: '#3b0764' },
+        { name: 'TK-B (5-6 Thn) 🦊', code: 'TK-B', color: 0x38bdf8, border: 0x0284c7, textColor: '#0f172a' },
+        { name: 'SD Kelas 1 🦁', code: 'SD-1', color: 0x4ade80, border: 0x15803d, textColor: '#0f172a' }
     ];
 
     grades.forEach((g, idx) => {
         let btnBg = scene.add.rectangle(200, 190 + (idx * 115), 310, 85, g.color).setInteractive().setStrokeStyle(5, g.border);
-        let btnTxt = scene.add.text(200, 190 + (idx * 115), g.name, { font: '900 22px Arial', fill: '#0f172a' }).setOrigin(0.5);
+        let btnTxt = scene.add.text(200, 190 + (idx * 115), g.name, { font: '900 22px Arial', fill: g.textColor }).setOrigin(0.5);
         uiGroup.addMultiple([btnBg, btnTxt]);
 
         btnBg.on('pointerdown', () => {
             selectedGrade = g.code;
+            saveProgress();
             showStageSelectScreen(scene);
         });
     });
@@ -137,7 +192,9 @@ function showStageSelectScreen(scene) {
     clearScreen(scene);
 
     let bg = scene.add.rectangle(200, 350, 370, 660, 0xfffbebe).setStrokeStyle(6, 0xfacc15);
-    let title = scene.add.text(200, 70, `Stage ${selectedGrade} 🗺️`, { font: '900 22px Arial', fill: '#4c1d95' }).setOrigin(0.5);
+    
+    // Teks Gelap (Purple Tua)
+    let title = scene.add.text(200, 70, `Stage ${selectedGrade} 🗺️`, { font: '900 22px Arial', fill: '#3b0764' }).setOrigin(0.5);
     
     let backBtn = scene.add.text(45, 45, '⬅️', { font: '32px Arial' }).setInteractive();
     backBtn.on('pointerdown', () => showGradeSelectScreen(scene));
@@ -159,7 +216,10 @@ function showStageSelectScreen(scene) {
 
         let btnBg = scene.add.rectangle(posX, posY, 140, 75, btnColor).setStrokeStyle(4, borderColor);
         let label = isUnlocked ? `Stage ${i} ⭐` : `🔒 ${i}`;
-        let btnTxt = scene.add.text(posX, posY, label, { font: '900 18px Arial', fill: '#ffffff' }).setOrigin(0.5);
+        
+        // Teks Dalam Tombol Stage Dibuat Hitam/Putih dengan Kontras Jelas
+        let txtColor = isUnlocked ? '#ffffff' : '#475569';
+        let btnTxt = scene.add.text(posX, posY, label, { font: '900 18px Arial', fill: txtColor }).setOrigin(0.5);
 
         uiGroup.addMultiple([btnBg, btnTxt]);
 
@@ -168,6 +228,7 @@ function showStageSelectScreen(scene) {
             btnBg.on('pointerdown', () => {
                 currentStage = i;
                 currentQuestionIndex = 0;
+                saveProgress();
                 speakAudio(`Stage ${i} dimulai!`);
                 startQuestion(scene);
             });
@@ -176,7 +237,7 @@ function showStageSelectScreen(scene) {
 }
 
 /* ==========================================
-   4. GAMEPLAY (Teks & Gambar Super Besar)
+   4. GAMEPLAY (Kontras Tinggi & Auto Save)
    ========================================== */
 function startQuestion(scene) {
     clearScreen(scene);
@@ -184,35 +245,30 @@ function startQuestion(scene) {
     let bg = scene.add.rectangle(200, 350, 370, 660, 0xfffbebe).setStrokeStyle(6, 0xfacc15);
     gameGroup.add(bg);
 
-    // Tombol Home
     let homeBtn = scene.add.text(40, 40, '🏠', { font: '32px Arial' }).setInteractive();
     homeBtn.on('pointerdown', () => showStageSelectScreen(scene));
     gameGroup.add(homeBtn);
 
-    // HUD Status (Skor & Progress Besar)
-    scoreText = scene.add.text(85, 42, '⭐ ' + score, { font: '900 22px Arial', fill: '#d97706' });
-    hudText = scene.add.text(370, 42, `Stg ${currentStage} (${currentQuestionIndex+1}/10)`, { font: '900 16px Arial', fill: '#6b21a8' }).setOrigin(1, 0);
+    // Header HUD Teks Warna Ungu Tua & Orange Tua (Bukan Putih)
+    scoreText = scene.add.text(85, 42, '⭐ ' + score, { font: '900 22px Arial', fill: '#b45309' });
+    hudText = scene.add.text(370, 42, `Stg ${currentStage} (${currentQuestionIndex+1}/10)`, { font: '900 16px Arial', fill: '#3b0764' }).setOrigin(1, 0);
     gameGroup.addMultiple([scoreText, hudText]);
 
     let qData = generateRandomQuestion(selectedGrade, currentStage, currentQuestionIndex);
 
-    // Instruksi Teks Besar (20px-22px)
     let instructionText = scene.add.text(200, 115, qData.question, { 
-        font: '900 20px Arial', fill: '#1e293b', align: 'center', wordWrap: { width: 330 } 
+        font: '900 20px Arial', fill: '#0f172a', align: 'center', wordWrap: { width: 330 } 
     }).setOrigin(0.5);
     gameGroup.add(instructionText);
 
-    // Area Gambar/Display Super Besar (80px - 100px)
-    let dispText = scene.add.text(200, 230, qData.display, { font: '80px Arial', align: 'center' }).setOrigin(0.5);
+    let dispText = scene.add.text(200, 230, qData.display, { font: '75px Arial', align: 'center' }).setOrigin(0.5);
     gameGroup.add(dispText);
 
-    // Target Drop Zone Diperbesar (105x105 px)
-    dropZone = scene.add.rectangle(200, 360, 105, 105, 0xbfdbfe).setStrokeStyle(5, 0x2563eb);
-    let targetHint = scene.add.text(200, 360, '?', { font: '900 45px Arial', fill: '#3b82f6' }).setOrigin(0.5);
+    dropZone = scene.add.rectangle(200, 360, 105, 105, 0xbfdbfe).setStrokeStyle(5, 0x1d4ed8);
+    let targetHint = scene.add.text(200, 360, '?', { font: '900 45px Arial', fill: '#1e40af' }).setOrigin(0.5);
     dropZone.isTarget = qData.target;
     gameGroup.addMultiple([dropZone, targetHint]);
 
-    // Render Pilihan Jawaban (Lingkaran & Teks Besar)
     qData.options.forEach((opt, idx) => {
         let total = qData.options.length;
         let startX = 200 - ((total - 1) * 65);
@@ -221,9 +277,8 @@ function startQuestion(scene) {
         let container = scene.add.container(posX, 530);
         let bgCircle = scene.add.circle(0, 0, 42, 0xfacc15).setStrokeStyle(4, 0xca8a04);
         
-        // Cek apakah opsi berupa emoji atau angka/huruf
         let fontSize = (opt.toString().length > 2) ? '45px Arial' : '900 38px Arial';
-        let txt = scene.add.text(0, 0, opt.toString(), { font: fontSize, fill: '#000' }).setOrigin(0.5);
+        let txt = scene.add.text(0, 0, opt.toString(), { font: fontSize, fill: '#0f172a' }).setOrigin(0.5);
         
         container.add([bgCircle, txt]);
         container.setSize(84, 84);
@@ -235,18 +290,19 @@ function startQuestion(scene) {
 }
 
 /* ==========================================
-   5. GENERATOR SOAL HIGH VARIETY
+   5. BANK SOAL KAYA & BERVARIASI
    ========================================== */
 function generateRandomQuestion(grade, stage, qIdx) {
-    let type = ['MATH', 'LOGIC', 'PHONICS'][qIdx % 3];
+    let types = ['MATH', 'LOGIC', 'PHONICS'];
+    let type = types[qIdx % 3];
 
     if (type === 'MATH') {
-        let maxVal = 3 + stage + (grade === 'TK-B' ? 3 : grade === 'SD-1' ? 8 : 0);
+        let maxVal = 3 + stage + (grade === 'TK-B' ? 4 : grade === 'SD-1' ? 9 : 0);
         let num1 = Math.floor(Math.random() * maxVal) + 1;
-        let num2 = Math.floor(Math.random() * 3) + 1;
+        let num2 = Math.floor(Math.random() * 4) + 1;
 
         if (stage <= 2 && grade === 'TK-A') {
-            const emojis = ['🍎', '🐶', '⭐', '🎈', '🚗', '🐱'];
+            const emojis = ['🍎', '🐶', '⭐', '🎈', '🚗', '🐱', '🍇', '🐸', '🍦', '⚽'];
             let em = emojis[Math.floor(Math.random() * emojis.length)];
             return {
                 question: "Hitung gambarnya yuk!",
@@ -255,16 +311,33 @@ function generateRandomQuestion(grade, stage, qIdx) {
                 options: generateUniqueOptions(num1)
             };
         } else {
-            let ans = num1 + num2;
-            return {
-                question: `Berapa Hasilnya?\n${num1} + ${num2} = ?`,
-                display: "🧮",
-                target: ans,
-                options: generateUniqueOptions(ans)
-            };
+            // Kombinasi Tambah & Kurang
+            let isMinus = (stage > 4 && Math.random() > 0.5);
+            if (isMinus) {
+                let ans = num1;
+                let total = num1 + num2;
+                return {
+                    question: `Berapa Sisa Hasilnya?\n${total} - ${num2} = ?`,
+                    display: "🧮",
+                    target: ans,
+                    options: generateUniqueOptions(ans)
+                };
+            } else {
+                let ans = num1 + num2;
+                return {
+                    question: `Berapa Jumlahnya?\n${num1} + ${num2} = ?`,
+                    display: "🧮",
+                    target: ans,
+                    options: generateUniqueOptions(ans)
+                };
+            }
         }
     } else if (type === 'LOGIC') {
-        let set = [['🐱','🐶'], ['🍎','🍌'], ['⭐','🎈'], ['🚗','🚀'], ['🔴','🔵']][(stage + qIdx) % 5];
+        let patternSets = [
+            ['🐱','🐶'], ['🍎','🍌'], ['⭐','🎈'], ['🚗','🚀'], ['🔴','🔵'],
+            ['🦁','🐯'], ['🍦','🍩'], ['🍇','🍊'], ['🟢','🟡'], ['✈️','🚁']
+        ];
+        let set = patternSets[Math.floor(Math.random() * patternSets.length)];
         return {
             question: "Lengkapi Polanya!",
             display: `${set[0]} ${set[1]} ${set[0]}`,
@@ -272,14 +345,18 @@ function generateRandomQuestion(grade, stage, qIdx) {
             options: shuffle([set[0], set[1]])
         };
     } else {
+        // PHONICS & WORDS BANK PANJANG
         let bank = [
             { word: 'CAT 🐱', ans: 'C' }, { word: 'DOG 🐶', ans: 'D' },
             { word: 'SUN ☀️', ans: 'S' }, { word: 'BALL ⚽', ans: 'B' },
             { word: 'FISH 🐟', ans: 'F' }, { word: 'APPLE 🍎', ans: 'A' },
-            { word: 'CAR 🚗', ans: 'C' }, { word: 'LION 🦁', ans: 'L' }
+            { word: 'CAR 🚗', ans: 'C' }, { word: 'LION 🦁', ans: 'L' },
+            { word: 'DUCK 🦆', ans: 'D' }, { word: 'MILK 🥛', ans: 'M' },
+            { word: 'ICE 🍦', ans: 'I' }, { word: 'NEST 🪹', ans: 'N' },
+            { word: 'PIG 🐷', ans: 'P' }, { word: 'RING 💍', ans: 'R' }
         ];
         let item = bank[Math.floor(Math.random() * bank.length)];
-        let wrongLetters = ['X','Z','P','M','O','K'].filter(l => l !== item.ans);
+        let wrongLetters = ['X','Z','P','M','O','K','W','V'].filter(l => l !== item.ans);
         let wrong = wrongLetters[Math.floor(Math.random() * wrongLetters.length)];
 
         return {
@@ -306,7 +383,7 @@ function shuffle(array) {
 }
 
 /* ==========================================
-   6. DRAG & DROP LOGIC
+   6. DRAG & DROP LOGIC & AUTO SAVE
    ========================================== */
 function makeDraggable(scene, item) {
     item.setInteractive();
@@ -323,14 +400,18 @@ function makeDraggable(scene, item) {
         if (Phaser.Geom.Intersects.RectangleToRectangle(item.getBounds(), dropZone.getBounds())) {
             if (item.value.toString() === dropZone.isTarget.toString()) {
                 score += 10;
-                speakAudio("Pintar! Jawabannya Benar!");
+                speakAudio("Pintar! Benar!");
                 
                 currentQuestionIndex++;
+                
+                // AUTO SAVE PROGRESS SETIAP SOAL TERSELESAIKAN
+                saveProgress();
 
                 if (currentQuestionIndex >= 10) {
                     if (currentStage === unlockedStages[selectedGrade] && unlockedStages[selectedGrade] < 10) {
                         unlockedStages[selectedGrade]++;
                     }
+                    saveProgress();
                     speakAudio(`Hore! Stage ${currentStage} Selesai!`);
                     setTimeout(() => showStageSelectScreen(scene), 1000);
                     return;
