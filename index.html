@@ -47,6 +47,12 @@
 </head>
 <body class="bg-slate-100 app-viewport w-screen flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
 
+  <!-- HTML5 KIDS BGM AUDIO PLAYER (Multi-Source CDN) -->
+  <audio id="bgm-kids-audio" loop preload="auto" crossorigin="anonymous">
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939fd2926.mp3?filename=happy-kids-123284.mp3" type="audio/mpeg">
+    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=happy-ukulele-112188.mp3" type="audio/mpeg">
+  </audio>
+
   <!-- FRAME UTAMA GAME -->
   <div class="relative w-full max-w-[420px] h-full md:max-h-[750px] bg-white md:rounded-[32px] border-0 md:border-4 border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between">
     
@@ -278,7 +284,7 @@ let phaserScene = null;
 // Audio System
 let audioCtx = null;
 let isSoundMuted = false;
-let bgmTimer = null;
+let kidsSynthLoopTimer = null;
 
 function initAudioContext() {
     if (!audioCtx) {
@@ -289,7 +295,7 @@ function initAudioContext() {
     }
 }
 
-// EFEK CARTOON BOING BUMPER OPENING
+// 1. EFEK CARTOON BOING BUMPER OPENING
 function playBumperBoingSFX() {
     if (isSoundMuted) return;
     try {
@@ -326,116 +332,97 @@ function enterAppFromBumper() {
     showScreen('screen-cover');
 }
 
-// 16-BIT AUDIO SYNTHESIZER (HARVEST MOON BTN POLYPHONIC SOUND ENGINE)
-function play16BitNote(freq, bassFreq, isAccent) {
-    if (isSoundMuted || !audioCtx) return;
-    try {
-        const now = audioCtx.currentTime;
-
-        // LAYER 1: ACOUSTIC WOODEN MARIMBA / XYLOPHONE (Harmonic Sine + Triangle Layering)
-        const osc1 = audioCtx.createOscillator();
-        const osc2 = audioCtx.createOscillator();
-        const gainMelody = audioCtx.createGain();
-
-        osc1.type = 'sine';     // Fundamental Tone
-        osc2.type = 'triangle'; // Rich Harmonic Layer
-        
-        osc1.frequency.setValueAtTime(freq, now);
-        osc2.frequency.setValueAtTime(freq * 2, now); // 1-Octave Higher Resonance
-
-        gainMelody.gain.setValueAtTime(0.08, now);
-        gainMelody.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
-
-        osc1.connect(gainMelody);
-        osc2.connect(gainMelody);
-        gainMelody.connect(audioCtx.destination);
-
-        osc1.start(now);
-        osc2.start(now);
-        osc1.stop(now + 0.22);
-        osc2.stop(now + 0.22);
-
-        // LAYER 2: 16-BIT BASSLINE (Warm Plucked Bass)
-        if (bassFreq) {
-            const bassOsc = audioCtx.createOscillator();
-            const bassGain = audioCtx.createGain();
-
-            bassOsc.type = 'triangle';
-            bassOsc.frequency.setValueAtTime(bassFreq, now);
-
-            bassGain.gain.setValueAtTime(0.07, now);
-            bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-
-            bassOsc.connect(bassGain);
-            bassGain.connect(audioCtx.destination);
-
-            bassOsc.start(now);
-            bassOsc.stop(now + 0.25);
-        }
-
-        // LAYER 3: PERCUSSION METRONOME (High-Hat Metronome Tick)
-        if (isAccent) {
-            const percOsc = audioCtx.createOscillator();
-            const percGain = audioCtx.createGain();
-
-            percOsc.type = 'square';
-            percOsc.frequency.setValueAtTime(1800, now);
-
-            percGain.gain.setValueAtTime(0.015, now);
-            percGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.03);
-
-            percOsc.connect(percGain);
-            percGain.connect(audioCtx.destination);
-
-            percOsc.start(now);
-            percOsc.stop(now + 0.03);
-        }
-
-    } catch(e) {}
-}
-
+// 2. ULTRA-HAPPY KIDS BGM ENGINE (BOUNCY TOY PIANO + XYLOPHONE MELODY)
 function startBGM() {
-    if (isSoundMuted || bgmTimer) return;
+    if (isSoundMuted) return;
     initAudioContext();
 
-    // Harvest Moon BTN Spring Theme 16-Bit Polyphonic Score
-    const hm16BitMelody = [
-        // Bar 1 - C Major
-        { f: 523.25, b: 130.81, acc: true },  { f: 659.25, b: null,   acc: false },
-        { f: 783.99, b: 196.00, acc: false }, { f: 1046.50, b: null,  acc: true },
-        { f: 880.00, b: 130.81, acc: false }, { f: 783.99, b: null,   acc: false },
-        { f: 659.25, b: 196.00, acc: true },  { f: 523.25, b: null,   acc: false },
+    const audioEl = document.getElementById('bgm-kids-audio');
+    if (audioEl) {
+        audioEl.volume = 0.35;
+        let playPromise = audioEl.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(() => {
+                // Fail-safe jika audio MP3 luar terblokir CORS
+                startHappyKidsSynthBGM();
+            });
+        }
+    } else {
+        startHappyKidsSynthBGM();
+    }
+}
 
-        // Bar 2 - D Minor
-        { f: 587.33, b: 146.83, acc: true },  { f: 698.46, b: null,   acc: false },
-        { f: 880.00, b: 220.00, acc: false }, { f: 1174.66, b: null,  acc: true },
-        { f: 1046.50, b: 146.83, acc: false },{ f: 880.00, b: null,   acc: false },
-        { f: 783.99, b: 220.00, acc: true },  { f: 587.33, b: null,   acc: false },
+function startHappyKidsSynthBGM() {
+    if (kidsSynthLoopTimer) return;
 
-        // Bar 3 - G Major / Village Bounce
-        { f: 659.25, b: 164.81, acc: true },  { f: 783.99, b: null,   acc: false },
-        { f: 1046.50, b: 246.94, acc: false },{ f: 1318.51, b: null,  acc: true },
-        { f: 1174.66, b: 164.81, acc: false },{ f: 1046.50, b: null,  acc: false },
-        { f: 880.00, b: 246.94, acc: true },  { f: 783.99, b: null,   acc: false }
+    // Super Ceria Kids Melody Scale (Upbeat Nursery Style)
+    const kidsMelody = [
+        { f: 523.25, b: 261.63, dur: 0.15 }, { f: 659.25, b: null, dur: 0.15 },
+        { f: 783.99, b: 329.63, dur: 0.15 }, { f: 1046.50, b: null, dur: 0.30 },
+        { f: 880.00, b: 261.63, dur: 0.15 }, { f: 783.99, b: null, dur: 0.15 },
+        { f: 659.25, b: 329.63, dur: 0.30 },
+        { f: 587.33, b: 293.66, dur: 0.15 }, { f: 698.46, b: null, dur: 0.15 },
+        { f: 880.00, b: 349.23, dur: 0.15 }, { f: 1174.66, b: null, dur: 0.30 },
+        { f: 1046.50, b: 293.66, dur: 0.15 }, { f: 880.00, b: null, dur: 0.15 },
+        { f: 783.99, b: 349.23, dur: 0.30 }
     ];
 
     let step = 0;
 
-    bgmTimer = setInterval(() => {
+    kidsSynthLoopTimer = setInterval(() => {
         if (isSoundMuted || !audioCtx) return;
-        if (audioCtx.state === 'suspended') audioCtx.resume();
+        try {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const note = kidsMelody[step];
 
-        const note = hm16BitMelody[step];
-        play16BitNote(note.f, note.b, note.acc);
+            // Bright Toy Xylophone Sound Generator
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
 
-        step = (step + 1) % hm16BitMelody.length;
+            osc.type = 'triangle'; // Wood Acoustic Resonator
+            osc.frequency.setValueAtTime(note.f, now);
+
+            gain.gain.setValueAtTime(0.09, now);
+            gain.gain.exponentialRampToValueAtTime(0.0005, now + note.dur);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + note.dur);
+
+            // Plucked Bass Accompaniment
+            if (note.b) {
+                const bassOsc = audioCtx.createOscillator();
+                const bassGain = audioCtx.createGain();
+
+                bassOsc.type = 'sine';
+                bassOsc.frequency.setValueAtTime(note.b, now);
+
+                bassGain.gain.setValueAtTime(0.08, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + note.dur + 0.1);
+
+                bassOsc.connect(bassGain);
+                bassGain.connect(audioCtx.destination);
+
+                bassOsc.start(now);
+                bassOsc.stop(now + note.dur + 0.1);
+            }
+
+            step = (step + 1) % kidsMelody.length;
+        } catch(e) {}
     }, 180);
 }
 
 function stopBGM() {
-    if (bgmTimer) {
-        clearInterval(bgmTimer);
-        bgmTimer = null;
+    const audioEl = document.getElementById('bgm-kids-audio');
+    if (audioEl) audioEl.pause();
+
+    if (kidsSynthLoopTimer) {
+        clearInterval(kidsSynthLoopTimer);
+        kidsSynthLoopTimer = null;
     }
 }
 
