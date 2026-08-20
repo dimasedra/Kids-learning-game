@@ -243,12 +243,12 @@
     <!-- HEADER SOAL HIGH CONTRAST -->
     <div class="px-3 pt-2 text-center z-10 bg-white">
       <span id="q-title" class="inline-block bg-amber-400 text-amber-950 text-[11px] font-black px-3 py-1 rounded-full border border-amber-500 shadow-xs">
-        PENJUMLAHAN
+        -
       </span>
-      <h3 id="q-sub" class="text-xs font-black text-slate-900 mt-1">Hitung hasil penjumlahan berikut:</h3>
+      <h3 id="q-sub" class="text-xs font-black text-slate-900 mt-1">-</h3>
       
       <div id="q-box" class="mt-2 p-3 bg-sky-100 border-3 border-sky-400 rounded-2xl text-slate-900 text-lg font-black shadow-md flex flex-col items-center justify-center min-h-[90px]">
-        2 + 3 = ?
+        -
       </div>
     </div>
 
@@ -292,6 +292,7 @@ let phaserScene = null;
 
 let audioCtx = null;
 let isSoundMuted = false;
+let phaserDropZone, phaserPlacedContainer, phaserSelectedValue, phaserDropText;
 
 const DICT = {
     ID: {
@@ -355,12 +356,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function toggleSettingsModal() {
     const modal = document.getElementById('modal-settings');
-    modal.classList.toggle('hidden');
+    const isHidden = modal.classList.toggle('hidden');
+    
+    // Perbaikan: Sinkronisasi visual tombol bahasa saat modal dibuka
+    if (!isHidden) {
+        updateLanguageButtonsUI(currentLang);
+    }
 }
 
-function setLanguage(lang) {
-    currentLang = lang;
-    
+function updateLanguageButtonsUI(lang) {
     const btnID = document.getElementById('opt-lang-id');
     const btnEN = document.getElementById('opt-lang-en');
 
@@ -371,14 +375,21 @@ function setLanguage(lang) {
         btnEN.className = "py-2 bg-amber-400 text-amber-950 font-black text-xs rounded-lg border-2 border-amber-500 shadow-xs flex items-center justify-center gap-1";
         btnID.className = "py-2 bg-white text-slate-600 font-bold text-xs rounded-lg border border-slate-300 shadow-xs flex items-center justify-center gap-1";
     }
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    updateLanguageButtonsUI(lang);
 
     saveProgress();
     updateUIStrings();
+    
+    if (currentQData) {
+        updateQuestionTexts();
+    }
+    
     if (!document.getElementById('screen-stage').classList.contains('hidden')) {
         renderStageGrid();
-    }
-    if (currentQData) {
-        startQuestion();
     }
 }
 
@@ -401,6 +412,23 @@ function updateUIStrings() {
     document.getElementById('btn-stage-menu').innerText = t.btnStageMenu;
 
     updateCoverUI();
+}
+
+function updateQuestionTexts() {
+    if (!currentQData) return;
+    
+    document.getElementById('q-title').innerText = (currentLang === 'ID') ? currentQData.title_ID : currentQData.title_EN;
+    document.getElementById('q-sub').innerText = (currentLang === 'ID') ? currentQData.sub_ID : currentQData.sub_EN;
+    
+    if (currentQData.display_ID && currentQData.display_EN) {
+        document.getElementById('q-box').innerHTML = (currentLang === 'ID') ? currentQData.display_ID : currentQData.display_EN;
+    } else {
+        document.getElementById('q-box').innerHTML = currentQData.display;
+    }
+
+    if (phaserDropText) {
+        phaserDropText.setText(currentLang === 'ID' ? 'Taruh jawaban di sini' : 'Drop answer here');
+    }
 }
 
 function initAudioContext() {
@@ -667,7 +695,7 @@ function startQuestion() {
 
     do {
         newQData = generateCurriculumQuestion(selectedGrade, currentStage, currentQuestionIndex);
-        qSignature = `${selectedGrade}_${currentLang}_${newQData.title}_${newQData.target}_${newQData.sub}`;
+        qSignature = `${selectedGrade}_${newQData.title_ID}_${newQData.target}_${newQData.sub_ID}`;
         attempts++;
     } while (recentQuestionsHistory.includes(qSignature) && attempts < 15);
 
@@ -678,14 +706,9 @@ function startQuestion() {
 
     currentQData = newQData;
 
-    document.getElementById('q-title').innerText = currentQData.title;
-    document.getElementById('q-sub').innerText = currentQData.sub;
-    document.getElementById('q-box').innerHTML = currentQData.display;
-
+    updateQuestionTexts();
     renderPhaserInteractive(currentQData);
 }
-
-let phaserDropZone, phaserPlacedContainer, phaserSelectedValue;
 
 function renderPhaserInteractive(qData) {
     if (!phaserScene) return;
@@ -700,8 +723,8 @@ function renderPhaserInteractive(qData) {
     dropBoxG.lineStyle(3, 0x0284c7, 1);
     dropBoxG.strokeRoundedRect(35, 15, 310, 80, 14);
 
-    let dropText = (currentLang === 'ID') ? 'Taruh jawaban di sini' : 'Drop answer here';
-    phaserScene.add.text(190, 55, dropText, { font: '900 14px sans-serif', fill: '#0369a1' }).setOrigin(0.5);
+    let dt = (currentLang === 'ID') ? 'Taruh jawaban di sini' : 'Drop answer here';
+    phaserDropText = phaserScene.add.text(190, 55, dt, { font: '900 14px sans-serif', fill: '#0369a1' }).setOrigin(0.5);
 
     phaserDropZone = phaserScene.add.rectangle(190, 55, 310, 80);
     phaserDropZone.isTarget = qData.target;
@@ -782,6 +805,16 @@ function renderPhaserInteractive(qData) {
         container.on('dragend', () => {
             playClickSFX();
             if (Phaser.Geom.Intersects.RectangleToRectangle(container.getBounds(), phaserDropZone.getBounds())) {
+                if (phaserPlacedContainer && phaserPlacedContainer !== container) {
+                    phaserScene.tweens.add({
+                        targets: phaserPlacedContainer,
+                        x: phaserPlacedContainer.origX,
+                        y: phaserPlacedContainer.origY,
+                        duration: 300,
+                        ease: 'Back.easeOut'
+                    });
+                }
+                
                 container.x = 190;
                 container.y = 55;
                 phaserSelectedValue = container.value;
@@ -964,8 +997,9 @@ function genTKA(stage) {
 
         let choices = shuffle([correctChar, getRandLetterExcept(correctChar), getRandLetterExcept(correctChar)]);
         return {
-            title: isEN ? "CAMBRIDGE PHONICS 🔤" : "FONIK CAMBRIDGE 🔤",
-            sub: isEN ? "First letter of this item:" : "Huruf depan dari benda ini:",
+            title_ID: "FONIK CAMBRIDGE 🔤", title_EN: "CAMBRIDGE PHONICS 🔤",
+            sub_ID: `Huruf depan dari kata "${itemName}":`,
+            sub_EN: `First letter of the word "${itemName}":`,
             display: `<div class="p-2 bg-white rounded-xl border-2 border-sky-300 mb-1 shadow-sm"><img src="${item.img}" class="w-14 h-14 mx-auto animate-bounce"></div><span class="text-slate-900 font-black text-xl">${itemName}</span>`,
             target: correctChar,
             options: choices
@@ -974,10 +1008,9 @@ function genTKA(stage) {
         let max = Math.min(8, 2 + stage);
         let count = Math.floor(Math.random() * (max - 1)) + 1;
         let item = ASSET_ARRAY[Math.floor(Math.random() * ASSET_ARRAY.length)];
-        let itemName = isEN ? item.name_en : item.name_id;
         return {
-            title: isEN ? "COUNT OBJECTS 🔢" : "HITUNG BENDA 🔢",
-            sub: isEN ? `How many ${itemName.toLowerCase()}s?` : `Berapa jumlah ${itemName.toLowerCase()} ini?`,
+            title_ID: "HITUNG BENDA 🔢", title_EN: "COUNT OBJECTS 🔢",
+            sub_ID: `Berapa jumlah benda ini?`, sub_EN: `How many objects are here?`,
             display: `<div class="flex flex-wrap justify-center gap-2 p-2 bg-white rounded-xl border-2 border-sky-300 shadow-sm">${`<img src="${item.img}" class="w-9 h-9">`.repeat(count)}</div>`,
             target: count,
             options: generateUniqueOptions(count)
@@ -987,8 +1020,8 @@ function genTKA(stage) {
         let set2 = ASSETS.BOOK;
         let set3 = ASSETS.CAR;
         return {
-            title: isEN ? "PATTERN LOGIC 🧩" : "SUSUN POLA 🧩",
-            sub: isEN ? "Complete the image pattern:" : "Lengkapi urutan gambar:",
+            title_ID: "SUSUN POLA 🧩", title_EN: "PATTERN LOGIC 🧩",
+            sub_ID: "Lengkapi urutan gambar:", sub_EN: "Complete the image pattern:",
             display: `<div class="flex items-center justify-center gap-2 p-2 bg-white rounded-xl border-2 border-sky-300 shadow-sm"><img src="${set1.img}" class="w-10 h-10"><img src="${set2.img}" class="w-10 h-10"><img src="${set1.img}" class="w-10 h-10"><span class="text-sky-600 font-black text-2xl">[ ? ]</span></div>`,
             target: set2.img,
             options: shuffle([set2.img, set1.img, set3.img])
@@ -1015,8 +1048,8 @@ function genTKB(stage) {
         ];
         let item = cvcList[Math.floor(Math.random() * cvcList.length)];
         return {
-            title: isEN ? "CVC WORDS 📖" : "KATA KANAK 📖",
-            sub: isEN ? "Fill in the middle vowel:" : "Lengkapi huruf vokal tengahnya:",
+            title_ID: "KATA KANAK 📖", title_EN: "CVC WORDS 📖",
+            sub_ID: "Lengkapi huruf vokal tengahnya:", sub_EN: "Fill in the middle vowel:",
             display: `<div class="text-3xl font-black text-slate-900 tracking-widest">${item.w.replace(item.ans, "<span class='text-sky-600 border-b-4 border-sky-600 px-1'>_</span>")}</div>`,
             target: item.ans,
             options: shuffle(item.opts)
@@ -1026,8 +1059,8 @@ function genTKB(stage) {
         let n2 = Math.floor(Math.random() * 5) + 1;
         let ans = n1 + n2;
         return {
-            title: isEN ? "ADDITION ➕" : "PENJUMLAHAN ➕",
-            sub: isEN ? "Calculate total addition:" : "Hitung total penjumlahan ini:",
+            title_ID: "PENJUMLAHAN ➕", title_EN: "ADDITION ➕",
+            sub_ID: "Hitung total penjumlahan ini:", sub_EN: "Calculate total addition:",
             display: `<div class="text-3xl font-black text-slate-900">${n1} + ${n2} = <span class="text-sky-600">?</span></div>`,
             target: ans,
             options: generateUniqueOptions(ans)
@@ -1037,8 +1070,8 @@ function genTKB(stage) {
         let n2 = Math.floor(Math.random() * 3) + 1;
         let ans = n1 - n2;
         return {
-            title: isEN ? "SUBTRACTION ➖" : "PENGURANGAN ➖",
-            sub: isEN ? "Calculate subtraction:" : "Hitung sisa pengurangan ini:",
+            title_ID: "PENGURANGAN ➖", title_EN: "SUBTRACTION ➖",
+            sub_ID: "Hitung sisa pengurangan ini:", sub_EN: "Calculate subtraction:",
             display: `<div class="text-3xl font-black text-slate-900">${n1} - ${n2} = <span class="text-sky-600">?</span></div>`,
             target: ans,
             options: generateUniqueOptions(ans)
@@ -1051,21 +1084,23 @@ function genSD1(stage) {
     let isEN = (currentLang === 'EN');
 
     if (type === 0) {
-        let sentences = isEN ? [
+        let sentences_EN = [
             { q: "The grass is [ ? ] 🌿", ans: "GREEN", opts: ["GREEN", "BLUE", "RED"] },
             { q: "An elephant is [ ? ] 🐘", ans: "BIG", opts: ["BIG", "SMALL", "TINY"] },
             { q: "The sun is [ ? ] ☀️", ans: "HOT", opts: ["HOT", "COLD", "DARK"] },
             { q: "Ice cream is [ ? ] 🍦", ans: "SWEET", opts: ["SWEET", "SALTY", "SOUR"] }
-        ] : [
+        ];
+        let sentences_ID = [
             { q: "Rumput berwarna [ ? ] 🌿", ans: "HIJAU", opts: ["HIJAU", "BIRU", "MERAH"] },
             { q: "Gajah berukuran [ ? ] 🐘", ans: "BESAR", opts: ["BESAR", "KECIL", "TIPIS"] },
             { q: "Matahari terasa [ ? ] ☀️", ans: "PANAS", opts: ["PANAS", "DINGIN", "GELAP"] },
             { q: "Es krim rasanya [ ? ] 🍦", ans: "MANIS", opts: ["MANIS", "ASIN", "PAHIT"] }
         ];
-        let item = sentences[Math.floor(Math.random() * sentences.length)];
+        let item = isEN ? sentences_EN[Math.floor(Math.random() * sentences_EN.length)] : sentences_ID[Math.floor(Math.random() * sentences_ID.length)];
         return {
-            title: isEN ? "ENGLISH SENTENCE 🇬🇧" : "KALIMAT BAHASA 🇮🇩",
-            sub: isEN ? "Complete the sentence:" : "Lengkapi kalimat ini:",
+            title_ID: "KALIMAT BAHASA 🇮🇩", title_EN: "ENGLISH SENTENCE 🇬🇧",
+            sub_ID: isEN ? "Lengkapi kalimat bahasa Inggris ini:" : "Lengkapi kalimat ini:",
+            sub_EN: isEN ? "Complete the sentence:" : "Complete this Indonesian sentence:",
             display: `<div class="text-xl font-black text-slate-900">${item.q}</div>`,
             target: item.ans,
             options: shuffle(item.opts)
@@ -1075,14 +1110,13 @@ function genSD1(stage) {
         let n2 = Math.floor(Math.random() * 4) + 2;
         let isAdd = Math.random() > 0.5;
         let ans = isAdd ? n1 + n2 : n1 - n2;
+        let text_ID = isAdd ? `Ani punya ${n1} permen, dibeli lagi ${n2}. Totalnya?` : `Ani punya ${n1} kue, dimakan ${n2}. Sisa berapa?`;
+        let text_EN = isAdd ? `Alex has ${n1} candies, gets ${n2} more. Total?` : `Alex has ${n1} cakes, eats ${n2}. Remaining?`;
         return {
-            title: isEN ? "STORY MATH 📖" : "SOAL CERITA 📖",
-            sub: isEN ? "Solve this word problem:" : "Selesaikan soal cerita ini:",
-            display: `<div class="text-base font-black text-slate-900 leading-snug">${
-                isEN 
-                ? (isAdd ? `Alex has ${n1} candies, gets ${n2} more. Total?` : `Alex has ${n1} cakes, eats ${n2}. Remaining?`)
-                : (isAdd ? `Ani punya ${n1} permen, dibeli lagi ${n2}. Totalnya?` : `Ani punya ${n1} kue, dimakan ${n2}. Sisa berapa?`)
-            }</div>`,
+            title_ID: "SOAL CERITA 📖", title_EN: "STORY MATH 📖",
+            sub_ID: "Selesaikan soal cerita ini:", sub_EN: "Solve this word problem:",
+            display_ID: `<div class="text-base font-black text-slate-900 leading-snug">${text_ID}</div>`,
+            display_EN: `<div class="text-base font-black text-slate-900 leading-snug">${text_EN}</div>`,
             target: ans,
             options: generateUniqueOptions(ans)
         };
@@ -1093,8 +1127,9 @@ function genSD1(stage) {
         let isBig = Math.random() > 0.5;
         let ans = isBig ? Math.max(n1, n2) : Math.min(n1, n2);
         return {
-            title: isEN ? "COMPARE NUMBERS" : "BANDINGKAN ANGKA",
-            sub: isEN ? (isBig ? "Which is LARGER?" : "Which is SMALLER?") : (isBig ? "Mana yang LEBIH BESAR?" : "Mana yang LEBIH KECIL?"),
+            title_ID: "BANDINGKAN ANGKA", title_EN: "COMPARE NUMBERS",
+            sub_ID: isBig ? "Mana yang LEBIH BESAR?" : "Mana yang LEBIH KECIL?",
+            sub_EN: isBig ? "Which is LARGER?" : "Which is SMALLER?",
             display: `<div class="text-3xl font-black text-slate-900">${n1} <span class="text-sky-600 font-bold">VS</span> ${n2}</div>`,
             target: ans,
             options: shuffle([n1, n2])
@@ -1111,8 +1146,8 @@ function genSD2(stage) {
         let n2 = Math.floor(Math.random() * 5) + 1;
         let ans = n1 * n2;
         return {
-            title: isEN ? "MULTIPLICATION ✖️" : "PERKALIAN DASAR ✖️",
-            sub: isEN ? "Solve multiplication:" : "Hitung perkalian sederhana ini:",
+            title_ID: "PERKALIAN DASAR ✖️", title_EN: "MULTIPLICATION ✖️",
+            sub_ID: "Hitung perkalian sederhana ini:", sub_EN: "Solve multiplication:",
             display: `<div class="text-3xl font-black text-slate-900">${n1} × ${n2} = <span class="text-sky-600">?</span></div>`,
             target: ans,
             options: generateUniqueOptions(ans)
@@ -1121,29 +1156,47 @@ function genSD2(stage) {
         let hour = Math.floor(Math.random() * 11) + 1;
         let formatted = (hour < 10 ? "0" : "") + hour + ".00";
         return {
-            title: isEN ? "TELLING TIME ⏰" : "MEMBACA JAM ⏰",
-            sub: isEN ? `Short hand at ${hour}, long hand at 12.` : `Jarum pendek di angka ${hour}, jarum panjang di angka 12.`,
-            display: `<div class="text-xl font-black text-slate-900">${isEN ? "What time is it?" : "Jam berapa sekarang?"}</div>`,
+            title_ID: "MEMBACA JAM ⏰", title_EN: "TELLING TIME ⏰",
+            sub_ID: `Jarum pendek di angka ${hour}, jarum panjang di angka 12.`,
+            sub_EN: `Short hand at ${hour}, long hand at 12.`,
+            display_ID: `<div class="text-xl font-black text-slate-900">Jam berapa sekarang?</div>`,
+            display_EN: `<div class="text-xl font-black text-slate-900">What time is it?</div>`,
             target: formatted,
             options: shuffle([formatted, "12.00", "06.00"])
         };
     } else {
-        let readingPool = isEN ? [
-            { text: "Roni likes reading science books every afternoon at the library.", q: "Where does Roni read?", ans: "LIBRARY", opts: ["LIBRARY", "PARK", "CLASS"] },
-            { text: "Budi plays soccer with his friends every Sunday at the field.", q: "Where does Budi play?", ans: "FIELD", opts: ["FIELD", "HOME", "BEACH"] },
-            { text: "Siti loves baking chocolate cakes in the kitchen with mom.", q: "Where does Siti bake?", ans: "KITCHEN", opts: ["KITCHEN", "PARK", "SCHOOL"] }
-        ] : [
-            { text: "Roni suka membaca buku sains setiap sore di perpustakaan.", q: "Di mana Roni membaca?", ans: "PERPUSTAKAAN", opts: ["PERPUSTAKAAN", "TAMAN", "KELAS"] },
-            { text: "Budi bermain sepak bola bersama teman-temannya di lapangan.", q: "Di mana Budi bermain?", ans: "LAPANGAN", opts: ["LAPANGAN", "RUMAH", "PANTAI"] },
-            { text: "Siti membantu ibu membuat kue cokelat lezat di dapur.", q: "Di mana Siti memasak?", ans: "DAPUR", opts: ["DAPUR", "TAMAN", "SEKOLAH"] }
+        let pool = [
+            {
+                t_id: "Roni suka membaca buku sains setiap sore di perpustakaan.",
+                t_en: "Roni likes reading science books every afternoon at the library.",
+                q_id: "Di mana Roni membaca?",
+                q_en: "Where does Roni read?",
+                ans: isEN ? "LIBRARY" : "PERPUSTAKAAN",
+                opts: isEN ? ["LIBRARY", "PARK", "CLASS"] : ["PERPUSTAKAAN", "TAMAN", "KELAS"]
+            },
+            {
+                t_id: "Budi bermain sepak bola bersama teman-temannya di lapangan.",
+                t_en: "Budi plays soccer with his friends every Sunday at the field.",
+                q_id: "Di mana Budi bermain?",
+                q_en: "Where does Budi play?",
+                ans: isEN ? "FIELD" : "LAPANGAN",
+                opts: isEN ? ["FIELD", "HOME", "BEACH"] : ["LAPANGAN", "RUMAH", "PANTAI"]
+            },
+            {
+                t_id: "Siti membantu ibu membuat kue cokelat lezat di dapur.",
+                t_en: "Siti loves baking chocolate cakes in the kitchen with mom.",
+                q_id: "Di mana Siti memasak?",
+                q_en: "Where does Siti bake?",
+                ans: isEN ? "KITCHEN" : "DAPUR",
+                opts: isEN ? ["KITCHEN", "PARK", "SCHOOL"] : ["DAPUR", "TAMAN", "SEKOLAH"]
+            }
         ];
-
-        let item = readingPool[Math.floor(Math.random() * readingPool.length)];
-
+        let item = pool[Math.floor(Math.random() * pool.length)];
         return {
-            title: isEN ? "READING COMPREHENSION 📖" : "MEMBACA PEMAHAMAN 📖",
-            sub: item.text,
-            display: `<div class="text-base font-black text-slate-900">${item.q}</div>`,
+            title_ID: "MEMBACA PEMAHAMAN 📖", title_EN: "READING COMPREHENSION 📖",
+            sub_ID: item.t_id, sub_EN: item.t_en,
+            display_ID: `<div class="text-base font-black text-slate-900">${item.q_id}</div>`,
+            display_EN: `<div class="text-base font-black text-slate-900">${item.q_en}</div>`,
             target: item.ans,
             options: shuffle(item.opts)
         };
@@ -1155,19 +1208,30 @@ function genSD3(stage) {
     let isEN = (currentLang === 'EN');
 
     if (type === 0) {
-        let stories = isEN ? [
-            { t: "Sarah has two fluffy rabbits. They love eating fresh orange carrots.", q: "What do rabbits eat?", ans: "CARROTS", opts: ["CARROTS", "APPLES", "MILK"] },
-            { t: "Lions are wild animals that live in open grasslands and hunt meat.", q: "What do lions eat?", ans: "MEAT", opts: ["MEAT", "GRASS", "FRUIT"] }
-        ] : [
-            { t: "Siti punya dua kelinci lucu. Mereka suka makan wortel oranye yang segar.", q: "Apa yang dimakan kelinci?", ans: "WORTEL", opts: ["WORTEL", "APEL", "SUSU"] },
-            { t: "Singa adalah hewan buas yang tinggal di padang rumput dan makan daging.", q: "Apa makanan singa?", ans: "DAGING", opts: ["DAGING", "RUMPUT", "BUAH"] }
+        let pool = [
+            {
+                t_id: "Siti punya dua kelinci lucu. Mereka suka makan wortel oranye yang segar.",
+                t_en: "Sarah has two fluffy rabbits. They love eating fresh orange carrots.",
+                q_id: "Apa yang dimakan kelinci?",
+                q_en: "What do rabbits eat?",
+                ans: isEN ? "CARROTS" : "WORTEL",
+                opts: isEN ? ["CARROTS", "APPLES", "MILK"] : ["WORTEL", "APEL", "SUSU"]
+            },
+            {
+                t_id: "Singa adalah hewan buas yang tinggal di padang rumput dan makan daging.",
+                t_en: "Lions are wild animals that live in open grasslands and hunt meat.",
+                q_id: "Apa makanan singa?",
+                q_en: "What do lions eat?",
+                ans: isEN ? "MEAT" : "DAGING",
+                opts: isEN ? ["MEAT", "GRASS", "FRUIT"] : ["DAGING", "RUMPUT", "BUAH"]
+            }
         ];
-
-        let item = stories[Math.floor(Math.random() * stories.length)];
+        let item = pool[Math.floor(Math.random() * pool.length)];
         return {
-            title: isEN ? "READING SD-3 📚" : "MEMBACA SD-3 📚",
-            sub: item.t,
-            display: `<div class="text-base font-black text-slate-900">${item.q}</div>`,
+            title_ID: "MEMBACA SD-3 📚", title_EN: "READING SD-3 📚",
+            sub_ID: item.t_id, sub_EN: item.t_en,
+            display_ID: `<div class="text-base font-black text-slate-900">${item.q_id}</div>`,
+            display_EN: `<div class="text-base font-black text-slate-900">${item.q_en}</div>`,
             target: item.ans,
             options: shuffle(item.opts)
         };
@@ -1177,8 +1241,8 @@ function genSD3(stage) {
         let n3 = Math.floor(Math.random() * 5) + 2;
         let ans = n1 + n2 - n3;
         return {
-            title: isEN ? "MATH LAB SD-3 🧪" : "MATEMATIKA SD-3 🧪",
-            sub: isEN ? "Calculate 3-number operation:" : "Hitung operasi campuran 3 angka ini:",
+            title_ID: "MATEMATIKA SD-3 🧪", title_EN: "MATH LAB SD-3 🧪",
+            sub_ID: "Hitung operasi campuran 3 angka ini:", sub_EN: "Calculate 3-number operation:",
             display: `<div class="text-2xl font-black text-slate-900">${n1} + ${n2} - ${n3} = <span class="text-sky-600">?</span></div>`,
             target: ans,
             options: generateUniqueOptions(ans)
@@ -1187,9 +1251,11 @@ function genSD3(stage) {
         let hours = Math.floor(Math.random() * 3) + 2;
         let ans = hours * 60;
         return {
-            title: isEN ? "TIME CONVERSION ⏱️" : "KONVERSI WAKTU ⏱️",
-            sub: isEN ? `If 1 hour = 60 mins, then ${hours} hours =` : `Jika 1 jam = 60 menit, maka ${hours} jam =`,
-            display: `<div class="text-2xl font-black text-slate-900">${isEN ? "How many minutes?" : "Berapa menit?"}</div>`,
+            title_ID: "KONVERSI WAKTU ⏱️", title_EN: "TIME CONVERSION ⏱️",
+            sub_ID: `Jika 1 jam = 60 menit, maka ${hours} jam =`,
+            sub_EN: `If 1 hour = 60 mins, then ${hours} hours =`,
+            display_ID: `<div class="text-2xl font-black text-slate-900">Berapa menit?</div>`,
+            display_EN: `<div class="text-2xl font-black text-slate-900">How many minutes?</div>`,
             target: ans,
             options: generateUniqueOptions(ans)
         };
