@@ -29,14 +29,9 @@
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         .float-anim { animation: floatAnim 3s ease-in-out infinite; }
-        .float-anim-reverse { animation: floatAnimRev 3.5s ease-in-out infinite; }
         @keyframes floatAnim {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-8px) rotate(4deg); }
-        }
-        @keyframes floatAnimRev {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(8px) rotate(-4deg); }
         }
         .pulse-text { animation: pulseAnim 1.5s ease-in-out infinite; }
         @keyframes pulseAnim {
@@ -47,24 +42,13 @@
 </head>
 <body class="bg-slate-100 app-viewport w-screen flex items-center justify-center p-0 md:p-4 select-none overflow-hidden">
 
-  <!-- HTML5 KIDS BGM AUDIO PLAYER (Multi-Source CDN) -->
-  <audio id="bgm-kids-audio" loop preload="auto" crossorigin="anonymous">
-    <source src="https://cdn.pixabay.com/download/audio/2022/10/14/audio_9939fd2926.mp3?filename=happy-kids-123284.mp3" type="audio/mpeg">
-    <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=happy-ukulele-112188.mp3" type="audio/mpeg">
-  </audio>
-
   <!-- FRAME UTAMA GAME -->
   <div class="relative w-full max-w-[420px] h-full md:max-h-[750px] bg-white md:rounded-[32px] border-0 md:border-4 border-slate-200 shadow-2xl overflow-hidden flex flex-col justify-between">
-    
-    <!-- GLOBAL AUDIO MUTE / UNMUTE FLOATING BUTTON -->
-    <button id="btn-sound-toggle" onclick="toggleSound(); playClickSFX();" class="absolute top-3 right-3 z-40 w-10 h-10 bg-white/90 backdrop-blur-sm border-2 border-amber-300 rounded-2xl shadow-md flex items-center justify-center text-lg btn-3d">
-      🔊
-    </button>
 
-    <!-- ==================== 0. BUMPER OPENING SCREEN ==================== -->
+    <!-- 0. BUMPER OPENING SCREEN -->
     <div id="screen-bumper" onclick="enterAppFromBumper()" class="absolute inset-0 z-50 bg-gradient-to-tr from-amber-400 via-yellow-300 to-amber-200 p-6 flex flex-col justify-between items-center text-center cursor-pointer">
       <div class="pt-8">
-        <span class="inline-block bg-white/80 backdrop-blur-sm text-amber-950 text-xs font-black px-4 py-1.5 rounded-full border border-white/60 shadow-sm">
+        <span id="bumper-tag" class="inline-block bg-white/80 backdrop-blur-sm text-amber-950 text-xs font-black px-4 py-1.5 rounded-full border border-white/60 shadow-sm">
           🎮 GAME EDUKASI ANAK
         </span>
       </div>
@@ -80,64 +64,32 @@
       <div class="pb-10 w-full">
         <div class="bg-white/90 backdrop-blur-md text-amber-950 font-black py-4 px-6 rounded-2xl shadow-lg border-2 border-white pulse-text flex items-center justify-center space-x-2">
           <span class="text-xl">👉</span>
-          <span class="text-sm">KETUK LAYAR UNTUK MAIN</span>
+          <span id="bumper-tap" class="text-sm">KETUK LAYAR UNTUK MAIN</span>
           <span class="text-xl">✨</span>
         </div>
       </div>
     </div>
 
-    <!-- ==================== 1. COVER SCREEN ==================== -->
+    <!-- 1. COVER SCREEN -->
     <div id="screen-cover" class="absolute inset-0 z-20 bg-gradient-to-b from-amber-50 via-sky-50 to-white p-5 flex flex-col justify-between items-center text-center pop-in overflow-y-auto hidden">
-      
-      <!-- Top Title Header -->
       <div class="w-full pt-2">
         <div class="inline-flex items-center gap-1.5 bg-amber-300/90 backdrop-blur-sm text-amber-950 text-[11px] font-black px-4 py-1.5 rounded-full border border-amber-400 shadow-sm mb-2">
           <span>✨</span> COC KIDS ACADEMY <span>✨</span>
         </div>
         <h1 class="text-3xl font-black text-slate-800 tracking-tight drop-shadow-xs">LITTLE CHAMPION</h1>
-        <p class="text-[11px] font-extrabold text-amber-700 mt-0.5 uppercase tracking-wider">Belajar Seru & Asah Logika</p>
+        <p id="cover-sub" class="text-[11px] font-extrabold text-amber-700 mt-0.5 uppercase tracking-wider">Belajar Seru & Asah Logika</p>
       </div>
 
-      <!-- Hero Visual Section -->
       <div class="my-auto py-2 relative w-full flex items-center justify-center min-h-[220px]">
         <div class="absolute w-56 h-56 bg-amber-200/60 rounded-full blur-2xl"></div>
-
-        <div class="absolute top-2 left-4 bg-white p-3 rounded-2xl shadow-md border-2 border-amber-200 float-anim text-2xl">
-          ✏️
-        </div>
-        <div class="absolute bottom-4 right-4 bg-white p-3 rounded-2xl shadow-md border-2 border-sky-200 float-anim text-2xl" style="animation-delay: 1.2s;">
-          🚀
-        </div>
-        <div class="absolute top-4 right-14 bg-white p-3 rounded-2xl shadow-md border-2 border-amber-300 float-anim-reverse text-2xl">
-          ⭐
-        </div>
-        <div class="absolute bottom-2 left-6 bg-white p-3 rounded-2xl shadow-md border-2 border-purple-200 float-anim-reverse text-2xl">
-          🧩
-        </div>
-
         <div class="w-40 h-40 bg-gradient-to-tr from-amber-300 via-yellow-300 to-amber-200 rounded-[38px] flex flex-col items-center justify-center shadow-xl border-4 border-white relative z-10 transform rotate-2">
-          <svg class="w-28 h-28 drop-shadow-md" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="25" cy="25" r="14" fill="#D97706"/>
-            <circle cx="25" cy="25" r="8" fill="#FDE68A"/>
-            <circle cx="75" cy="25" r="14" fill="#D97706"/>
-            <circle cx="75" cy="25" r="8" fill="#FDE68A"/>
-            <circle cx="50" cy="52" r="35" fill="#F59E0B"/>
-            <ellipse cx="50" cy="62" rx="16" ry="12" fill="#FEF3C7"/>
-            <ellipse cx="50" cy="56" rx="6" ry="4" fill="#78350F"/>
-            <circle cx="36" cy="48" r="4.5" fill="#1E293B"/>
-            <circle cx="37.5" cy="46.5" r="1.5" fill="white"/>
-            <circle cx="64" cy="48" r="4.5" fill="#1E293B"/>
-            <circle cx="65.5" cy="46.5" r="1.5" fill="white"/>
-            <ellipse cx="28" cy="56" rx="5" ry="3" fill="#F472B6" opacity="0.7"/>
-            <ellipse cx="72" cy="56" rx="5" ry="3" fill="#F472B6" opacity="0.7"/>
-          </svg>
-          <div class="bg-amber-950 text-yellow-300 text-[10px] font-black px-3 py-0.5 rounded-full shadow-xs -mt-1">
+          <span class="text-6xl">👑</span>
+          <div class="bg-amber-950 text-yellow-300 text-[10px] font-black px-3 py-0.5 rounded-full shadow-xs mt-2">
             LITTLE HERO 👑
           </div>
         </div>
       </div>
 
-      <!-- Action Buttons -->
       <div class="w-full space-y-2.5 pb-2">
         <button id="btn-start" onclick="playClickSFX(); handleStartBtn();" class="btn-3d w-full py-4 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-base rounded-2xl shadow-[0_5px_0_#d97706] tracking-wide">
           MULAI MAIN ▶
@@ -148,49 +100,65 @@
       </div>
     </div>
 
-    <!-- ==================== 2. PILIH GRADE ==================== -->
-    <div id="screen-grade" class="absolute inset-0 z-20 bg-white p-5 flex flex-col justify-between hidden pop-in">
+    <!-- 2. PILIH GRADE -->
+    <div id="screen-grade" class="absolute inset-0 z-20 bg-white p-5 flex flex-col justify-between hidden pop-in overflow-y-auto">
       <div>
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-3">
           <button onclick="playClickSFX(); showScreen('screen-cover');" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
-          <h2 class="text-lg font-black text-slate-800">Pilih Tingkatan</h2>
-          <div class="w-9"></div>
+          <h2 id="grade-title" class="text-lg font-black text-slate-800">Pilih Tingkatan</h2>
+          <button onclick="playClickSFX(); toggleSettingsModal();" class="w-9 h-9 bg-amber-100 rounded-xl font-black text-amber-800 border border-amber-300 text-sm">⚙️</button>
         </div>
         
-        <div class="space-y-3">
-          <button onclick="playClickSFX(); selectGrade('TK-A');" class="btn-3d w-full p-3.5 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#eab308]">
+        <div class="space-y-2.5 pb-4">
+          <button onclick="playClickSFX(); selectGrade('TK-A');" class="btn-3d w-full p-3 bg-yellow-100 border-2 border-yellow-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#eab308]">
             <div>
-              <div class="font-black text-yellow-900 text-base">TK-A (3-4 Tahun) 🐥</div>
-              <div class="text-[11px] font-bold text-yellow-700">Hitung benda & pola sederhana</div>
+              <div class="font-black text-yellow-900 text-sm">TK-A (3-4 Y.O) 🐥</div>
+              <div id="lbl-grade-tka" class="text-[10px] font-bold text-yellow-700">Cambridge Phonics & Hitung Benda</div>
             </div>
-            <span class="text-xl">➔</span>
+            <span class="text-lg">➔</span>
           </button>
 
-          <button onclick="playClickSFX(); selectGrade('TK-B');" class="btn-3d w-full p-3.5 bg-sky-100 border-2 border-sky-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#0284c7]">
+          <button onclick="playClickSFX(); selectGrade('TK-B');" class="btn-3d w-full p-3 bg-sky-100 border-2 border-sky-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#0284c7]">
             <div>
-              <div class="font-black text-sky-900 text-base">TK-B (5-6 Tahun) 🦊</div>
-              <div class="text-[11px] font-bold text-sky-700">Penjumlahan & Phonics A-Z</div>
+              <div class="font-black text-sky-900 text-sm">TK-B (5-6 Y.O) 🦊</div>
+              <div id="lbl-grade-tkb" class="text-[10px] font-bold text-sky-700">CVC Words, Membaca & Penjumlahan</div>
             </div>
-            <span class="text-xl">➔</span>
+            <span class="text-lg">➔</span>
           </button>
 
-          <button onclick="playClickSFX(); selectGrade('SD-1');" class="btn-3d w-full p-3.5 bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#16a34a]">
+          <button onclick="playClickSFX(); selectGrade('SD-1');" class="btn-3d w-full p-3 bg-emerald-100 border-2 border-emerald-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#16a34a]">
             <div>
-              <div class="font-black text-emerald-900 text-base">SD Kelas 1 (COC) 🦁</div>
-              <div class="text-[11px] font-bold text-emerald-700">Matematika belasan & eja kata</div>
+              <div class="font-black text-emerald-900 text-sm">SD Kelas 1 / Grade 1 🦁</div>
+              <div id="lbl-grade-sd1" class="text-[10px] font-bold text-emerald-700">Kalimat Bahasa & Soal Cerita</div>
             </div>
-            <span class="text-xl">➔</span>
+            <span class="text-lg">➔</span>
+          </button>
+
+          <button onclick="playClickSFX(); selectGrade('SD-2');" class="btn-3d w-full p-3 bg-purple-100 border-2 border-purple-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#9333ea]">
+            <div>
+              <div class="font-black text-purple-900 text-sm">SD Kelas 2 / Grade 2 🎒</div>
+              <div id="lbl-grade-sd2" class="text-[10px] font-bold text-purple-700">Perkalian Dasar & Membaca Jam</div>
+            </div>
+            <span class="text-lg">➔</span>
+          </button>
+
+          <button onclick="playClickSFX(); selectGrade('SD-3');" class="btn-3d w-full p-3 bg-rose-100 border-2 border-rose-400 rounded-2xl text-left flex items-center justify-between shadow-[0_4px_0_#e11d48]">
+            <div>
+              <div class="font-black text-rose-900 text-sm">SD Kelas 3 / Grade 3 🎓</div>
+              <div id="lbl-grade-sd3" class="text-[10px] font-bold text-rose-700">Cambridge Reading & Matematika</div>
+            </div>
+            <span class="text-lg">➔</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ==================== 3. PILIH STAGE ==================== -->
+    <!-- 3. PILIH STAGE -->
     <div id="screen-stage" class="absolute inset-0 z-20 bg-white p-5 flex flex-col hidden pop-in">
       <div class="flex items-center justify-between mb-3">
         <button onclick="playClickSFX(); showScreen('screen-grade');" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-sm">⬅️</button>
         <h2 id="stage-title" class="text-base font-black text-slate-800">Stage TK-A</h2>
-        <div class="w-9"></div>
+        <button onclick="playClickSFX(); toggleSettingsModal();" class="w-9 h-9 bg-amber-100 rounded-xl font-black text-amber-800 border border-amber-300 text-sm">⚙️</button>
       </div>
 
       <div id="stage-grid" class="grid grid-cols-2 gap-2.5 overflow-y-auto pb-4 flex-1">
@@ -198,48 +166,88 @@
       </div>
     </div>
 
-    <!-- ==================== 5. MODAL STAGE CLEAR ==================== -->
+    <!-- MODAL SETTINGS -->
+    <div id="modal-settings" class="absolute inset-0 z-40 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-5 hidden pop-in">
+      <div class="bg-white rounded-[24px] border-4 border-amber-300 p-5 w-full text-center shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-2">
+          <h3 id="modal-settings-title" class="text-lg font-black text-slate-800">⚙️ PENGATURAN</h3>
+          <button onclick="playClickSFX(); toggleSettingsModal();" class="w-8 h-8 bg-slate-100 rounded-xl font-black text-slate-500 text-xs">✕</button>
+        </div>
+
+        <div class="space-y-3 text-left">
+          <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
+            <label id="lbl-setting-lang" class="block text-xs font-black text-amber-900 mb-1.5">PILIH BAHASA / LANGUAGE</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="opt-lang-id" onclick="setLanguage('ID'); playClickSFX();" class="py-2 bg-amber-400 text-amber-950 font-black text-xs rounded-lg border-2 border-amber-500 shadow-xs flex items-center justify-center gap-1">
+                🇮🇩 Indonesia
+              </button>
+              <button id="opt-lang-en" onclick="setLanguage('EN'); playClickSFX();" class="py-2 bg-white text-slate-600 font-bold text-xs rounded-lg border border-slate-300 shadow-xs flex items-center justify-center gap-1">
+                🇬🇧 English
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-sky-50 p-3 rounded-xl border border-sky-200">
+            <label id="lbl-setting-sound" class="block text-xs font-black text-sky-900 mb-1.5">EFEK SUARA / SOUND SFX</label>
+            <button id="opt-sound-toggle" onclick="toggleSound(); playClickSFX();" class="w-full py-2.5 bg-sky-400 text-sky-950 font-black text-xs rounded-lg border-2 border-sky-500 shadow-xs flex items-center justify-center gap-1">
+              🔊 EFEK SUARA AKTIF
+            </button>
+          </div>
+        </div>
+
+        <button onclick="playClickSFX(); toggleSettingsModal();" class="btn-3d w-full py-3 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-sm rounded-xl shadow-[0_4px_0_#d97706]">
+          SIMPAN & TUTUP ✓
+        </button>
+      </div>
+    </div>
+
+    <!-- 5. MODAL STAGE CLEAR -->
     <div id="modal-stage-clear" class="absolute inset-0 z-30 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-5 hidden pop-in">
       <div class="bg-white rounded-[24px] border-4 border-amber-300 p-5 w-full text-center shadow-2xl space-y-3">
         <div class="text-5xl animate-bounce">🏆</div>
         <div>
-          <h3 id="modal-clear-title" class="text-xl font-black text-slate-800">STAGE 1 SELESAI!</h3>
-          <p class="text-[11px] font-bold text-slate-400 mt-0.5">Kamu berhasil menyelesaikan semua soal!</p>
+          <h3 id="modal-clear-title" class="text-xl font-black text-slate-800">STAGE SELESAI!</h3>
+          <p id="modal-clear-sub" class="text-[11px] font-bold text-slate-400 mt-0.5">Kamu berhasil menyelesaikan semua soal!</p>
         </div>
 
         <div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl flex items-center justify-center space-x-2">
-          <span class="text-yellow-600 text-base font-black">⭐ +100 Bintang</span>
+          <span id="modal-clear-stars" class="text-yellow-600 text-base font-black">⭐ +100 Bintang</span>
         </div>
 
         <div class="space-y-2 pt-1">
           <button id="btn-next-stage" onclick="playClickSFX(); goToNextStage();" class="btn-3d w-full py-3 bg-amber-400 hover:bg-amber-500 border-2 border-amber-500 text-amber-950 font-black text-sm rounded-xl shadow-[0_4px_0_#d97706]">
-            LANJUT KE STAGE 2 ▶
+            LANJUT KE STAGE BERIKUTNYA ▶
           </button>
-          <button onclick="playClickSFX(); goToStageMenuFromModal();" class="btn-3d w-full py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-600 font-bold text-xs rounded-xl shadow-[0_3px_0_#cbd5e1]">
+          <button id="btn-stage-menu" onclick="playClickSFX(); goToStageMenuFromModal();" class="btn-3d w-full py-2.5 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 text-slate-600 font-bold text-xs rounded-xl shadow-[0_3px_0_#cbd5e1]">
             Kembali ke Pilih Stage 🗺️
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ==================== 4. GAMEPLAY INTERACTIVE ==================== -->
-    <div id="hud-bar" class="p-3 flex justify-between items-center border-b border-slate-100 z-10 bg-white">
-      <button onclick="playClickSFX(); goToStageMenuFromModal();" class="w-9 h-9 bg-slate-100 rounded-xl font-black text-slate-600 border border-slate-200 text-xs">🏠</button>
-      <div class="flex items-center space-x-1 pr-8">
-        <span class="text-yellow-500 font-black text-base">⭐ <span id="txt-score">0</span></span>
+    <!-- 4. GAMEPLAY INTERACTIVE HUD BAR -->
+    <div id="hud-bar" class="p-3 bg-white border-b border-slate-100 z-10 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <button onclick="playClickSFX(); goToStageMenuFromModal();" class="w-9 h-9 bg-slate-100 hover:bg-slate-200 rounded-xl font-black text-slate-600 border border-slate-200 text-xs shadow-xs btn-3d">🏠</button>
+        <button onclick="playClickSFX(); toggleSettingsModal();" class="w-9 h-9 bg-amber-100 hover:bg-amber-200 rounded-xl font-black text-amber-800 border border-amber-300 text-xs shadow-xs btn-3d">⚙️</button>
       </div>
-      <div class="bg-amber-100 border border-amber-300 text-amber-900 text-[11px] font-black px-2.5 py-1 rounded-full mr-8" id="txt-progress">
-        STAGE 1 (1/10)
+
+      <div class="flex items-center space-x-2">
+        <span class="text-yellow-500 font-black text-xs md:text-sm">⭐ <span id="txt-score">0</span></span>
+        <div class="bg-amber-100 border border-amber-300 text-amber-900 text-[10px] md:text-[11px] font-black px-2.5 py-1 rounded-full shadow-xs" id="txt-progress">
+          STAGE 1 (1/10)
+        </div>
       </div>
     </div>
 
+    <!-- HEADER SOAL HIGH CONTRAST -->
     <div class="px-3 pt-2 text-center z-10 bg-white">
-      <span id="q-title" class="inline-block bg-slate-100 text-slate-700 text-[10px] font-black px-2.5 py-0.5 rounded-md border border-slate-200">
+      <span id="q-title" class="inline-block bg-amber-400 text-amber-950 text-[11px] font-black px-3 py-1 rounded-full border border-amber-500 shadow-xs">
         PENJUMLAHAN
       </span>
-      <h3 id="q-sub" class="text-xs font-bold text-slate-400 mt-0.5">Hitung hasil penjumlahan berikut:</h3>
+      <h3 id="q-sub" class="text-xs font-black text-slate-900 mt-1">Hitung hasil penjumlahan berikut:</h3>
       
-      <div id="q-box" class="mt-2 p-3 bg-sky-50 border-2 border-sky-300 rounded-xl text-xl font-black text-sky-800 shadow-xs">
+      <div id="q-box" class="mt-2 p-3 bg-sky-100 border-3 border-sky-400 rounded-2xl text-slate-900 text-lg font-black shadow-md flex flex-col items-center justify-center min-h-[90px]">
         2 + 3 = ?
       </div>
     </div>
@@ -247,7 +255,6 @@
     <div class="relative flex-1 w-full bg-slate-50 flex items-center justify-center overflow-hidden">
       <div id="phaser-canvas-container" class="w-full h-full flex items-center justify-center"></div>
       
-      <!-- CUTE TOAST NOTIFICATION CARD -->
       <div id="feedback-toast" class="hidden absolute top-4 inset-x-4 z-30 bg-white/95 backdrop-blur-md border-2 p-3.5 rounded-2xl shadow-xl pop-in flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div id="toast-icon-bg" class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner">
@@ -269,22 +276,131 @@
     </div>
 
   </div>
-
 <script>
 // State Global
+let currentLang = 'ID'; 
 let selectedGrade = 'TK-A';
 let currentStage = 1;
 let currentQuestionIndex = 0;
 let score = 0;
 
-let unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1 };
+let unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1, 'SD-2': 1, 'SD-3': 1 };
+let recentQuestionsHistory = [];
 let currentQData = null;
 let phaserScene = null;
 
-// Audio System
 let audioCtx = null;
 let isSoundMuted = false;
-let kidsSynthLoopTimer = null;
+
+const DICT = {
+    ID: {
+        bumperTag: "🎮 GAME EDUKASI ANAK",
+        bumperTap: "KETUK LAYAR UNTUK MAIN",
+        coverSub: "Belajar Seru & Asah Logika",
+        startBtn: "MULAI MAIN ▶",
+        startCont: "LANJUT BELAJAR",
+        resetBtn: "Mulai Dari Awal 🔄",
+        gradeTitle: "Pilih Tingkatan",
+        gradeTKA: "Cambridge Phonics & Hitung Benda",
+        gradeTKB: "CVC Words, Membaca & Penjumlahan",
+        gradeSD1: "Kalimat Bahasa & Soal Cerita",
+        gradeSD2: "Perkalian Dasar & Membaca Jam",
+        gradeSD3: "Cambridge Reading & Matematika",
+        btnCheck: "CEK JAWABAN ✓",
+        toastCorrectTitle: "HEBAT! JAWABAN BENAR",
+        toastCorrectSub: "Dapat +10 Poin Bintang ⭐",
+        toastWrongTitle: "YAH, HAMPIR BENAR!",
+        toastWrongSub: "Yuk coba dipikirkan lagi 🤗",
+        toastInfoTitle: "PILIH JAWABAN DULU YA!",
+        toastInfoSub: "Tarik salah satu kotak ke atas",
+        modalClearTitle: "STAGE SELESAI!",
+        modalClearSub: "Kamu berhasil menyelesaikan semua soal!",
+        modalClearStars: "⭐ +100 Bintang",
+        btnNextStage: "LANJUT KE STAGE BERIKUTNYA ▶",
+        btnStageMenu: "Kembali ke Pilih Stage 🗺️"
+    },
+    EN: {
+        bumperTag: "🎮 KIDS EDUCATIONAL GAME",
+        bumperTap: "TAP SCREEN TO PLAY",
+        coverSub: "Fun Learning & Logic Building",
+        startBtn: "START PLAYING ▶",
+        startCont: "CONTINUE LEARNING",
+        resetBtn: "Start From Scratch 🔄",
+        gradeTitle: "Select Grade Level",
+        gradeTKA: "Cambridge Phonics & Basic Counting",
+        gradeTKB: "CVC Words, Reading & Addition",
+        gradeSD1: "Sentence Completion & Word Problems",
+        gradeSD2: "Basic Multiplication & Telling Time",
+        gradeSD3: "Cambridge Reading & Advanced Math",
+        btnCheck: "CHECK ANSWER ✓",
+        toastCorrectTitle: "GREAT JOB! CORRECT ANSWER",
+        toastCorrectSub: "Earned +10 Star Points ⭐",
+        toastWrongTitle: "OOPS, ALMOST THERE!",
+        toastWrongSub: "Let's try thinking again 🤗",
+        toastInfoTitle: "PLEASE CHOOSE AN ANSWER!",
+        toastInfoSub: "Drag one of the boxes upward",
+        modalClearTitle: "STAGE COMPLETED!",
+        modalClearSub: "You successfully completed all questions!",
+        modalClearStars: "⭐ +100 Stars",
+        btnNextStage: "CONTINUE TO NEXT STAGE ▶",
+        btnStageMenu: "Back to Stage Select 🗺️"
+    }
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+    loadSaveData();
+    updateUIStrings();
+});
+
+function toggleSettingsModal() {
+    const modal = document.getElementById('modal-settings');
+    modal.classList.toggle('hidden');
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    
+    const btnID = document.getElementById('opt-lang-id');
+    const btnEN = document.getElementById('opt-lang-en');
+
+    if (lang === 'ID') {
+        btnID.className = "py-2 bg-amber-400 text-amber-950 font-black text-xs rounded-lg border-2 border-amber-500 shadow-xs flex items-center justify-center gap-1";
+        btnEN.className = "py-2 bg-white text-slate-600 font-bold text-xs rounded-lg border border-slate-300 shadow-xs flex items-center justify-center gap-1";
+    } else {
+        btnEN.className = "py-2 bg-amber-400 text-amber-950 font-black text-xs rounded-lg border-2 border-amber-500 shadow-xs flex items-center justify-center gap-1";
+        btnID.className = "py-2 bg-white text-slate-600 font-bold text-xs rounded-lg border border-slate-300 shadow-xs flex items-center justify-center gap-1";
+    }
+
+    saveProgress();
+    updateUIStrings();
+    if (!document.getElementById('screen-stage').classList.contains('hidden')) {
+        renderStageGrid();
+    }
+    if (currentQData) {
+        startQuestion();
+    }
+}
+
+function updateUIStrings() {
+    const t = DICT[currentLang];
+    document.getElementById('bumper-tag').innerText = t.bumperTag;
+    document.getElementById('bumper-tap').innerText = t.bumperTap;
+    document.getElementById('cover-sub').innerText = t.coverSub;
+    document.getElementById('btn-reset').innerText = t.resetBtn;
+    document.getElementById('grade-title').innerText = t.gradeTitle;
+    document.getElementById('lbl-grade-tka').innerText = t.gradeTKA;
+    document.getElementById('lbl-grade-tkb').innerText = t.gradeTKB;
+    document.getElementById('lbl-grade-sd1').innerText = t.gradeSD1;
+    document.getElementById('lbl-grade-sd2').innerText = t.gradeSD2;
+    document.getElementById('lbl-grade-sd3').innerText = t.gradeSD3;
+    document.getElementById('btn-check').innerText = t.btnCheck;
+    document.getElementById('modal-clear-sub').innerText = t.modalClearSub;
+    document.getElementById('modal-clear-stars').innerText = t.modalClearStars;
+    document.getElementById('btn-next-stage').innerText = t.btnNextStage;
+    document.getElementById('btn-stage-menu').innerText = t.btnStageMenu;
+
+    updateCoverUI();
+}
 
 function initAudioContext() {
     if (!audioCtx) {
@@ -295,13 +411,11 @@ function initAudioContext() {
     }
 }
 
-// 1. EFEK CARTOON BOING BUMPER OPENING
 function playBumperBoingSFX() {
     if (isSoundMuted) return;
     try {
         initAudioContext();
         const now = audioCtx.currentTime;
-        
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
 
@@ -323,173 +437,46 @@ function playBumperBoingSFX() {
 function enterAppFromBumper() {
     initAudioContext();
     playBumperBoingSFX();
-    
-    setTimeout(() => {
-        startBGM();
-    }, 150);
-
     document.getElementById('screen-bumper').classList.add('hidden');
     showScreen('screen-cover');
 }
 
-// 2. ULTRA-HAPPY KIDS BGM ENGINE (BOUNCY TOY PIANO + XYLOPHONE MELODY)
-function startBGM() {
-    if (isSoundMuted) return;
-    initAudioContext();
-
-    const audioEl = document.getElementById('bgm-kids-audio');
-    if (audioEl) {
-        audioEl.volume = 0.35;
-        let playPromise = audioEl.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.catch(() => {
-                // Fail-safe jika audio MP3 luar terblokir CORS
-                startHappyKidsSynthBGM();
-            });
-        }
-    } else {
-        startHappyKidsSynthBGM();
-    }
-}
-
-function startHappyKidsSynthBGM() {
-    if (kidsSynthLoopTimer) return;
-
-    // Super Ceria Kids Melody Scale (Upbeat Nursery Style)
-    const kidsMelody = [
-        { f: 523.25, b: 261.63, dur: 0.15 }, { f: 659.25, b: null, dur: 0.15 },
-        { f: 783.99, b: 329.63, dur: 0.15 }, { f: 1046.50, b: null, dur: 0.30 },
-        { f: 880.00, b: 261.63, dur: 0.15 }, { f: 783.99, b: null, dur: 0.15 },
-        { f: 659.25, b: 329.63, dur: 0.30 },
-        { f: 587.33, b: 293.66, dur: 0.15 }, { f: 698.46, b: null, dur: 0.15 },
-        { f: 880.00, b: 349.23, dur: 0.15 }, { f: 1174.66, b: null, dur: 0.30 },
-        { f: 1046.50, b: 293.66, dur: 0.15 }, { f: 880.00, b: null, dur: 0.15 },
-        { f: 783.99, b: 349.23, dur: 0.30 }
-    ];
-
-    let step = 0;
-
-    kidsSynthLoopTimer = setInterval(() => {
-        if (isSoundMuted || !audioCtx) return;
-        try {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const now = audioCtx.currentTime;
-            const note = kidsMelody[step];
-
-            // Bright Toy Xylophone Sound Generator
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = 'triangle'; // Wood Acoustic Resonator
-            osc.frequency.setValueAtTime(note.f, now);
-
-            gain.gain.setValueAtTime(0.09, now);
-            gain.gain.exponentialRampToValueAtTime(0.0005, now + note.dur);
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc.start(now);
-            osc.stop(now + note.dur);
-
-            // Plucked Bass Accompaniment
-            if (note.b) {
-                const bassOsc = audioCtx.createOscillator();
-                const bassGain = audioCtx.createGain();
-
-                bassOsc.type = 'sine';
-                bassOsc.frequency.setValueAtTime(note.b, now);
-
-                bassGain.gain.setValueAtTime(0.08, now);
-                bassGain.gain.exponentialRampToValueAtTime(0.001, now + note.dur + 0.1);
-
-                bassOsc.connect(bassGain);
-                bassGain.connect(audioCtx.destination);
-
-                bassOsc.start(now);
-                bassOsc.stop(now + note.dur + 0.1);
-            }
-
-            step = (step + 1) % kidsMelody.length;
-        } catch(e) {}
-    }, 180);
-}
-
-function stopBGM() {
-    const audioEl = document.getElementById('bgm-kids-audio');
-    if (audioEl) audioEl.pause();
-
-    if (kidsSynthLoopTimer) {
-        clearInterval(kidsSynthLoopTimer);
-        kidsSynthLoopTimer = null;
-    }
-}
-
 function toggleSound() {
     isSoundMuted = !isSoundMuted;
-    const btn = document.getElementById('btn-sound-toggle');
+    const btnModal = document.getElementById('opt-sound-toggle');
     if (isSoundMuted) {
-        btn.innerText = '🔇';
-        stopBGM();
+        btnModal.innerText = '🔇 EFEK SUARA MATI';
+        btnModal.className = "w-full py-2.5 bg-slate-200 text-slate-700 font-black text-xs rounded-lg border-2 border-slate-300 shadow-xs flex items-center justify-center gap-1";
     } else {
-        btn.innerText = '🔊';
-        startBGM();
+        btnModal.innerText = '🔊 EFEK SUARA AKTIF';
+        btnModal.className = "w-full py-2.5 bg-sky-400 text-sky-950 font-black text-xs rounded-lg border-2 border-sky-500 shadow-xs flex items-center justify-center gap-1";
     }
 }
 
-// AUTO-STOP SUARA SAAT APLIKASI DI-CLOSE / DI-MINIMIZE / PINDAH TAB
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-        stopBGM();
-        if (audioCtx && audioCtx.state === 'running') audioCtx.suspend();
-    } else {
-        const bumperHidden = document.getElementById('screen-bumper').classList.contains('hidden');
-        if (!isSoundMuted && bumperHidden) {
-            initAudioContext();
-            startBGM();
-        }
-    }
-});
-
-window.addEventListener('pagehide', () => {
-    stopBGM();
-    if (audioCtx) audioCtx.suspend();
-});
-
-// BUTTON CLICK SFX
 function playClickSFX() {
     if (isSoundMuted) return;
     try {
         initAudioContext();
-
         const now = audioCtx.currentTime;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-
         osc.type = 'sine';
         osc.frequency.setValueAtTime(450, now);
         osc.frequency.exponentialRampToValueAtTime(850, now + 0.04);
-
         gain.gain.setValueAtTime(0.12, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
         osc.start(now);
         osc.stop(now + 0.04);
     } catch (e) {}
 }
 
-// GAMEPLAY SFX
 function playCuteSFX(type) {
     if (isSoundMuted) return;
     try {
         initAudioContext();
-
         const now = audioCtx.currentTime;
-
         if (type === 'CORRECT') {
             const notes = [1046.50, 1318.51, 1567.98, 2093.00];
             notes.forEach((freq, index) => {
@@ -539,7 +526,6 @@ function playCuteSFX(type) {
     } catch (e) {}
 }
 
-// Phaser Config
 const config = {
     type: Phaser.AUTO,
     parent: 'phaser-canvas-container',
@@ -557,32 +543,27 @@ function updatePhaser() {}
 function showScreen(screenId) {
     document.querySelectorAll('.z-20').forEach(el => el.classList.add('hidden'));
     document.getElementById('modal-stage-clear').classList.add('hidden');
+    document.getElementById('modal-settings').classList.add('hidden');
     
-    if (screenId === 'screen-stage') {
-        renderStageGrid();
-    }
-
-    if (screenId) {
-        document.getElementById(screenId).classList.remove('hidden');
-    }
+    if (screenId === 'screen-stage') renderStageGrid();
+    if (screenId) document.getElementById(screenId).classList.remove('hidden');
     if (screenId === 'screen-cover') updateCoverUI();
 }
 
-function goToStageMenuFromModal() {
-    showScreen('screen-stage');
-}
+function goToStageMenuFromModal() { showScreen('screen-stage'); }
 
 function updateCoverUI() {
     loadSaveData();
     const hasSave = (localStorage.getItem('LITTLE_CHAMPION_SAVE') !== null);
     const btnStart = document.getElementById('btn-start');
     const btnReset = document.getElementById('btn-reset');
+    const t = DICT[currentLang];
 
     if (hasSave) {
-        btnStart.innerText = `LANJUT BELAJAR (Stg ${currentStage} - Soal ${currentQuestionIndex + 1}/10) ▶`;
+        btnStart.innerText = `${t.startCont} (Stg ${currentStage} - ${currentQuestionIndex + 1}/10) ▶`;
         btnReset.classList.remove('hidden');
     } else {
-        btnStart.innerText = 'MULAI MAIN ▶';
+        btnStart.innerText = `${t.startBtn}`;
         btnReset.classList.add('hidden');
     }
 }
@@ -602,6 +583,7 @@ function selectGrade(grade) {
     selectedGrade = grade;
     currentStage = unlockedStages[grade] || 1;
     currentQuestionIndex = 0;
+    recentQuestionsHistory = [];
     saveProgress();
     showScreen('screen-stage');
 }
@@ -633,6 +615,7 @@ function renderStageGrid() {
                 if (currentStage !== i) {
                     currentStage = i;
                     currentQuestionIndex = 0;
+                    recentQuestionsHistory = [];
                 }
                 saveProgress();
                 showScreen(null);
@@ -645,15 +628,16 @@ function renderStageGrid() {
 
 function resetProgress() {
     localStorage.removeItem('LITTLE_CHAMPION_SAVE');
-    selectedGrade = 'TK-A'; currentStage = 1; currentQuestionIndex = 0; score = 0;
-    unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1 };
-    updateCoverUI();
+    selectedGrade = 'TK-A'; currentStage = 1; currentQuestionIndex = 0; score = 0; currentLang = 'ID';
+    recentQuestionsHistory = [];
+    unlockedStages = { 'TK-A': 1, 'TK-B': 1, 'SD-1': 1, 'SD-2': 1, 'SD-3': 1 };
+    updateUIStrings();
     showScreen('screen-grade');
 }
 
 function saveProgress() {
     localStorage.setItem('LITTLE_CHAMPION_SAVE', JSON.stringify({
-        selectedGrade, currentStage, currentQuestionIndex, score, unlockedStages
+        selectedGrade, currentStage, currentQuestionIndex, score, unlockedStages, currentLang
     }));
 }
 
@@ -667,6 +651,7 @@ function loadSaveData() {
             currentQuestionIndex = (data.currentQuestionIndex !== undefined) ? data.currentQuestionIndex : 0;
             score = data.score || 0;
             unlockedStages = data.unlockedStages || unlockedStages;
+            if (data.currentLang) currentLang = data.currentLang;
         } catch (e) {}
     }
 }
@@ -675,16 +660,30 @@ function startQuestion() {
     document.getElementById('txt-score').innerText = score;
     document.getElementById('txt-progress').innerText = `STAGE ${currentStage} (${currentQuestionIndex + 1}/10)`;
 
-    currentQData = generateCurriculumQuestion(selectedGrade, currentStage, currentQuestionIndex);
+    let attempts = 0;
+    let newQData = null;
+    let qSignature = "";
+
+    do {
+        newQData = generateCurriculumQuestion(selectedGrade, currentStage, currentQuestionIndex);
+        qSignature = `${selectedGrade}_${currentLang}_${newQData.title}_${newQData.target}_${newQData.sub}`;
+        attempts++;
+    } while (recentQuestionsHistory.includes(qSignature) && attempts < 15);
+
+    recentQuestionsHistory.push(qSignature);
+    if (recentQuestionsHistory.length > 8) {
+        recentQuestionsHistory.shift();
+    }
+
+    currentQData = newQData;
 
     document.getElementById('q-title').innerText = currentQData.title;
     document.getElementById('q-sub').innerText = currentQData.sub;
-    document.getElementById('q-box').innerText = currentQData.display;
+    document.getElementById('q-box').innerHTML = currentQData.display;
 
     renderPhaserInteractive(currentQData);
 }
 
-// Phaser Layer
 let phaserDropZone, phaserPlacedContainer, phaserSelectedValue;
 
 function renderPhaserInteractive(qData) {
@@ -696,20 +695,44 @@ function renderPhaserInteractive(qData) {
 
     let dropBoxG = phaserScene.add.graphics();
     dropBoxG.fillStyle(0xffffff, 1);
-    dropBoxG.fillRoundedRect(40, 15, 300, 80, 14);
-    dropBoxG.lineStyle(2, 0xcbd5e1, 1);
-    dropBoxG.strokeRoundedRect(40, 15, 300, 80, 14);
+    dropBoxG.fillRoundedRect(35, 15, 310, 80, 14);
+    dropBoxG.lineStyle(3, 0x0284c7, 1);
+    dropBoxG.strokeRoundedRect(35, 15, 310, 80, 14);
 
-    let dropHint = phaserScene.add.text(190, 55, 'Taruh jawaban di sini', { font: '700 13px sans-serif', fill: '#94a3b8' }).setOrigin(0.5);
+    let dropText = (currentLang === 'ID') ? 'Taruh jawaban di sini' : 'Drop answer here';
+    phaserScene.add.text(190, 55, dropText, { font: '900 14px sans-serif', fill: '#0369a1' }).setOrigin(0.5);
 
-    phaserDropZone = phaserScene.add.rectangle(190, 55, 300, 80);
+    phaserDropZone = phaserScene.add.rectangle(190, 55, 310, 80);
     phaserDropZone.isTarget = qData.target;
 
+    let numOpts = qData.options.length;
+    let canvasWidth = 380;
+    let sideMargin = 16;
+    let availableWidth = canvasWidth - (sideMargin * 2);
+
+    let totalWidthNeeded = 0;
+    let itemWidths = [];
+
+    qData.options.forEach((opt) => {
+        let str = opt.toString();
+        let w = 76; 
+        if (typeof opt === 'string' && !opt.startsWith('http')) {
+            w = Math.max(76, Math.min(130, str.length * 10 + 20));
+        }
+        itemWidths.push(w);
+        totalWidthNeeded += w;
+    });
+
+    let spacing = Math.max(8, (availableWidth - totalWidthNeeded) / (numOpts + 1));
+    let currentX = sideMargin + spacing;
+
     qData.options.forEach((opt, idx) => {
-        let total = qData.options.length;
-        let startX = 190 - ((total - 1) * 55);
-        let posX = startX + (idx * 110);
+        let boxW = itemWidths[idx];
+        let boxH = 50;
+        let posX = currentX + (boxW / 2);
         let posY = 175;
+
+        currentX += boxW + spacing;
 
         let container = phaserScene.add.container(posX, posY);
         container.origX = posX;
@@ -717,14 +740,34 @@ function renderPhaserInteractive(qData) {
 
         let bgG = phaserScene.add.graphics();
         bgG.fillStyle(0xffffff, 1);
-        bgG.fillRoundedRect(-38, -26, 76, 52, 12);
-        bgG.lineStyle(2, 0xe2e8f0, 1);
-        bgG.strokeRoundedRect(-38, -26, 76, 52, 12);
+        bgG.fillRoundedRect(-boxW/2, -boxH/2, boxW, boxH, 14);
+        bgG.lineStyle(3, 0xf59e0b, 1);
+        bgG.strokeRoundedRect(-boxW/2, -boxH/2, boxW, boxH, 14);
 
-        let txt = phaserScene.add.text(0, 0, opt.toString(), { font: '800 18px sans-serif', fill: '#1e293b' }).setOrigin(0.5);
+        if (typeof opt === 'string' && opt.startsWith('http')) {
+            let imgKey = `opt_img_${idx}`;
+            if (!phaserScene.textures.exists(imgKey)) {
+                phaserScene.load.svg(imgKey, opt, { width: 34, height: 34 });
+                phaserScene.load.once('complete', () => {
+                    let imgSprite = phaserScene.add.image(0, 0, imgKey);
+                    container.add([bgG, imgSprite]);
+                });
+                phaserScene.load.start();
+            } else {
+                let imgSprite = phaserScene.add.image(0, 0, imgKey);
+                container.add([bgG, imgSprite]);
+            }
+        } else {
+            let str = opt.toString();
+            let fontSize = '16px';
+            if (str.length > 10) fontSize = '11px';
+            else if (str.length > 7) fontSize = '13px';
 
-        container.add([bgG, txt]);
-        container.setSize(76, 52);
+            let txt = phaserScene.add.text(0, 0, str, { font: `900 ${fontSize} sans-serif`, fill: '#0f172a' }).setOrigin(0.5);
+            container.add([bgG, txt]);
+        }
+
+        container.setSize(boxW, boxH);
         container.value = opt;
 
         container.setInteractive();
@@ -757,9 +800,10 @@ function renderPhaserInteractive(qData) {
 function verifyAnswerHTML() {
     playClickSFX();
     const toast = document.getElementById('feedback-toast');
+    const t = DICT[currentLang];
 
     if (!phaserSelectedValue) {
-        showCuteToast('INFO', 'PILIH JAWABAN DULU YA!', 'Tarik salah satu kotak ke atas');
+        showCuteToast('INFO', t.toastInfoTitle, t.toastInfoSub);
         playCuteSFX('WRONG');
         return;
     }
@@ -767,7 +811,7 @@ function verifyAnswerHTML() {
     if (phaserSelectedValue.toString() === currentQData.target.toString()) {
         score += 10;
         playCuteSFX('CORRECT');
-        showCuteToast('CORRECT', 'JAWABAN BENAR! PINTAR!', 'Dapat +10 Bintang ⭐');
+        showCuteToast('CORRECT', t.toastCorrectTitle, t.toastCorrectSub);
 
         currentQuestionIndex++;
         
@@ -795,7 +839,7 @@ function verifyAnswerHTML() {
 
     } else {
         playCuteSFX('WRONG');
-        showCuteToast('WRONG', 'YAH, HAMPIR BENAR!', 'Yuk coba dipikirkan lagi 🤗');
+        showCuteToast('WRONG', t.toastWrongTitle, t.toastWrongSub);
 
         if (phaserPlacedContainer) {
             phaserScene.tweens.add({
@@ -849,15 +893,17 @@ function showCuteToast(type, title, subtitle) {
 }
 
 function showStageClearModal(completedStage) {
-    document.getElementById('modal-clear-title').innerText = `STAGE ${completedStage} SELESAI!`;
+    const t = DICT[currentLang];
+    document.getElementById('modal-clear-title').innerText = `STAGE ${completedStage} ${currentLang === 'ID' ? 'SELESAI!' : 'CLEAR!'}`;
     const nextBtn = document.getElementById('btn-next-stage');
 
     if (completedStage < 10) {
-        nextBtn.innerText = `LANJUT KE STAGE ${completedStage + 1} ▶`;
+        nextBtn.innerText = `${t.btnNextStage}`;
         nextBtn.onclick = () => {
             playClickSFX();
             currentStage = completedStage + 1;
             currentQuestionIndex = 0;
+            recentQuestionsHistory = [];
             saveProgress();
             document.getElementById('modal-stage-clear').classList.add('hidden');
             startQuestion();
@@ -878,129 +924,282 @@ function goToNextStage() {
     if (currentStage < 10) {
         currentStage++;
         currentQuestionIndex = 0;
+        recentQuestionsHistory = [];
         saveProgress();
         document.getElementById('modal-stage-clear').classList.add('hidden');
         startQuestion();
     }
 }
 
-// Curriculum Generator
+const ASSETS = {
+    APPLE: { name_id: 'APEL', name_en: 'APPLE', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f34e.svg' },
+    CAT: { name_id: 'KUCING', name_en: 'CAT', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f431.svg' },
+    DOG: { name_id: 'ANJING', name_en: 'DOG', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f436.svg' },
+    FISH: { name_id: 'IKAN', name_en: 'FISH', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f41f.svg' },
+    CAR: { name_id: 'MOBIL', name_en: 'CAR', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f697.svg' },
+    SUN: { name_id: 'MATAHARI', name_en: 'SUN', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2600.svg' },
+    STAR: { name_id: 'BINTANG', name_en: 'STAR', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/2b50.svg' },
+    BOOK: { name_id: 'BUKU', name_en: 'BOOK', img: 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/1f4d6.svg' }
+};
+
+const ASSET_ARRAY = Object.values(ASSETS);
+
 function generateCurriculumQuestion(grade, stage, qIdx) {
-    let pool = [];
-
-    if (grade === 'TK-A') {
-        if (stage <= 5) pool = ['COUNT_EASY', 'LOGIC_2_SIMPLE', 'PHONICS_EASY'];
-        else pool = ['COUNT_MED', 'ADD_EASY', 'LOGIC_2', 'PHONICS_EASY'];
-    } else if (grade === 'TK-B') {
-        if (stage <= 5) pool = ['ADD_MED', 'LOGIC_2', 'PHONICS_LETTER', 'COMPARE_EASY'];
-        else pool = ['ADD_HARD', 'SUB_EASY', 'LOGIC_3', 'PHONICS_LETTER', 'WORD_SPELL'];
-    } else {
-        if (stage <= 5) pool = ['ADD_HARD', 'SUB_MED', 'LOGIC_3', 'COMPARE_MED', 'WORD_SPELL'];
-        else pool = ['MATH_ADVANCED', 'SUB_HARD', 'LOGIC_3', 'WORD_SPELL'];
-    }
-
-    let selectedType = pool[Math.floor(Math.random() * pool.length)];
-    return buildQuestionByType(selectedType, stage);
+    if (grade === 'TK-A') return genTKA(stage);
+    if (grade === 'TK-B') return genTKB(stage);
+    if (grade === 'SD-1') return genSD1(stage);
+    if (grade === 'SD-2') return genSD2(stage);
+    return genSD3(stage);
 }
 
-function buildQuestionByType(type, stage) {
-    if (type === 'COUNT_EASY') {
-        const em = ['🍎', '🐶', '⭐', '🎈', '🐱'][Math.floor(Math.random() * 5)];
-        let count = Math.floor(Math.random() * 4) + 1;
-        return { title: "HITUNG BENDA", sub: "Berapa jumlah benda ini?", display: `${em} `.repeat(count), target: count, options: generateUniqueOptions(count) };
-    }
-    
-    if (type === 'COUNT_MED') {
-        const em = ['🍇', '🚗', '🐸', '🍦', '⚽'][Math.floor(Math.random() * 5)];
-        let count = Math.floor(Math.random() * 4) + 4;
-        return { title: "HITUNG BENDA", sub: "Berapa jumlah benda ini?", display: `${em} `.repeat(count), target: count, options: generateUniqueOptions(count) };
-    }
+function genTKA(stage) {
+    let type = Math.floor(Math.random() * 3);
+    let isEN = (currentLang === 'EN');
 
-    if (type === 'ADD_EASY') {
-        let n1 = Math.floor(Math.random() * 3) + 1;
-        let n2 = Math.floor(Math.random() * 2) + 1;
-        let ans = n1 + n2;
-        return { title: "PENJUMLAHAN", sub: "Hitung hasil penjumlahan:", display: `${n1} + ${n2} = ?`, target: ans, options: generateUniqueOptions(ans) };
-    }
+    if (type === 0) {
+        let item = ASSET_ARRAY[Math.floor(Math.random() * ASSET_ARRAY.length)];
+        let itemName = isEN ? item.name_en : item.name_id;
+        let correctChar = itemName.charAt(0).toUpperCase();
 
-    if (type === 'ADD_MED') {
-        let n1 = Math.floor(Math.random() * 5) + 2;
-        let n2 = Math.floor(Math.random() * 4) + 1;
-        let ans = n1 + n2;
-        return { title: "PENJUMLAHAN", sub: "Hitung totalnya:", display: `${n1} + ${n2} = ?`, target: ans, options: generateUniqueOptions(ans) };
+        let choices = shuffle([correctChar, getRandLetterExcept(correctChar), getRandLetterExcept(correctChar)]);
+        return {
+            title: isEN ? "CAMBRIDGE PHONICS 🔤" : "FONIK CAMBRIDGE 🔤",
+            sub: isEN ? "First letter of this item:" : "Huruf depan dari benda ini:",
+            display: `<div class="p-2 bg-white rounded-xl border-2 border-sky-300 mb-1 shadow-sm"><img src="${item.img}" class="w-14 h-14 mx-auto animate-bounce"></div><span class="text-slate-900 font-black text-xl">${itemName}</span>`,
+            target: correctChar,
+            options: choices
+        };
+    } else if (type === 1) {
+        let max = Math.min(8, 2 + stage);
+        let count = Math.floor(Math.random() * (max - 1)) + 1;
+        let item = ASSET_ARRAY[Math.floor(Math.random() * ASSET_ARRAY.length)];
+        let itemName = isEN ? item.name_en : item.name_id;
+        return {
+            title: isEN ? "COUNT OBJECTS 🔢" : "HITUNG BENDA 🔢",
+            sub: isEN ? `How many ${itemName.toLowerCase()}s?` : `Berapa jumlah ${itemName.toLowerCase()} ini?`,
+            display: `<div class="flex flex-wrap justify-center gap-2 p-2 bg-white rounded-xl border-2 border-sky-300 shadow-sm">${`<img src="${item.img}" class="w-9 h-9">`.repeat(count)}</div>`,
+            target: count,
+            options: generateUniqueOptions(count)
+        };
+    } else {
+        let set1 = ASSETS.STAR;
+        let set2 = ASSETS.BOOK;
+        let set3 = ASSETS.CAR;
+        return {
+            title: isEN ? "PATTERN LOGIC 🧩" : "SUSUN POLA 🧩",
+            sub: isEN ? "Complete the image pattern:" : "Lengkapi urutan gambar:",
+            display: `<div class="flex items-center justify-center gap-2 p-2 bg-white rounded-xl border-2 border-sky-300 shadow-sm"><img src="${set1.img}" class="w-10 h-10"><img src="${set2.img}" class="w-10 h-10"><img src="${set1.img}" class="w-10 h-10"><span class="text-sky-600 font-black text-2xl">[ ? ]</span></div>`,
+            target: set2.img,
+            options: shuffle([set2.img, set1.img, set3.img])
+        };
     }
+}
 
-    if (type === 'ADD_HARD') {
-        let n1 = Math.floor(Math.random() * 8) + 5;
-        let n2 = Math.floor(Math.random() * 6) + 3;
-        let ans = n1 + n2;
-        return { title: "PENJUMLAHAN", sub: "Hitung total belasan:", display: `${n1} + ${n2} = ?`, target: ans, options: generateUniqueOptions(ans) };
-    }
+function genTKB(stage) {
+    let type = Math.floor(Math.random() * 3);
+    let isEN = (currentLang === 'EN');
 
-    if (type === 'SUB_EASY') {
-        let n1 = Math.floor(Math.random() * 4) + 3;
-        let n2 = Math.floor(Math.random() * (n1 - 1)) + 1;
-        let ans = n1 - n2;
-        return { title: "PENGURANGAN", sub: "Hitung sisanya:", display: `${n1} - ${n2} = ?`, target: ans, options: generateUniqueOptions(ans) };
-    }
-
-    if (type === 'SUB_MED' || type === 'SUB_HARD') {
-        let n1 = Math.floor(Math.random() * 8) + 7;
-        let n2 = Math.floor(Math.random() * 5) + 2;
-        let ans = n1 - n2;
-        return { title: "PENGURANGAN", sub: "Hitung sisanya:", display: `${n1} - ${n2} = ?`, target: ans, options: generateUniqueOptions(ans) };
-    }
-
-    if (type === 'MATH_ADVANCED') {
-        let n1 = Math.floor(Math.random() * 6) + 5;
-        let n2 = Math.floor(Math.random() * 4) + 2;
-        let n3 = Math.floor(Math.random() * 3) + 1;
-        let ans = n1 + n2 - n3;
-        return { title: "COC MATH LAB", sub: "Hitung 3 angka ini:", display: `${n1} + ${n2} - ${n3} = ?`, target: ans, options: generateUniqueOptions(ans) };
-    }
-
-    if (type === 'COMPARE_EASY' || type === 'COMPARE_MED') {
-        let n1 = Math.floor(Math.random() * 10) + 1;
-        let n2 = Math.floor(Math.random() * 10) + 1;
-        while (n1 === n2) n2 = Math.floor(Math.random() * 10) + 1;
-        let isBigger = Math.random() > 0.5;
-        let ans = isBigger ? Math.max(n1, n2) : Math.min(n1, n2);
-        return { title: "BANDINGKAN ANGKA", sub: isBigger ? "Mana yang LEBIH BESAR?" : "Mana yang LEBIH KECIL?", display: `${n1}  VS  ${n2}`, target: ans, options: shuffle([n1, n2]) };
-    }
-
-    if (type === 'LOGIC_2_SIMPLE' || type === 'LOGIC_2') {
-        let sets = [['🍎','🍌'], ['🐱','🐶'], ['⭐','🎈'], ['🔴','🔵'], ['🚗','🚀']][Math.floor(Math.random() * 5)];
-        return { title: "SUSUN POLA", sub: "Lengkapi urutan gambar:", display: `${sets[0]}  ${sets[1]}  ${sets[0]}  [ ? ]`, target: sets[1], options: shuffle([sets[0], sets[1]]) };
-    }
-
-    if (type === 'LOGIC_3') {
-        let sets = [['🔴','🟡','🔵'], ['🐱','🐶','🐰'], ['🍎','🍌','🍇'], ['⚽','🏀','🎾']][Math.floor(Math.random() * 4)];
-        return { title: "SUSUN POLA 3", sub: "Lengkapi urutan 3 gambar:", display: `${sets[0]} ${sets[1]} ${sets[2]} [ ? ]`, target: sets[0], options: shuffle([sets[0], sets[1], sets[2]]) };
-    }
-
-    if (type === 'PHONICS_EASY') {
-        let bank = [{ word: 'APPLE 🍎', ans: 'A' }, { word: 'BALL ⚽', ans: 'B' }, { word: 'CAT 🐱', ans: 'C' }, { word: 'DOG 🐶', ans: 'D' }];
-        let item = bank[Math.floor(Math.random() * bank.length)];
-        return { title: "TEBAK HURUF", sub: "Huruf pertama kata ini:", display: item.word, target: item.ans, options: shuffle([item.ans, 'E', 'F']) };
-    }
-
-    if (type === 'PHONICS_LETTER') {
-        let bank = [
-            { word: 'FISH 🐟', ans: 'F' }, { word: 'HAT 👒', ans: 'H' }, { word: 'ICE 🍦', ans: 'I' },
-            { word: 'LION 🦁', ans: 'L' }, { word: 'MILK 🥛', ans: 'M' }, { word: 'SUN ☀️', ans: 'S' }
+    if (type === 0) {
+        let cvcList = isEN ? [
+            { w: "CAT 🐱", ans: "A", opts: ["A", "O", "U"] },
+            { w: "DOG 🐶", ans: "O", opts: ["O", "I", "E"] },
+            { w: "SUN ☀️", ans: "U", opts: ["U", "A", "E"] },
+            { w: "BUS 🚌", ans: "U", opts: ["U", "O", "I"] },
+            { w: "PEN 🖊️", ans: "E", opts: ["E", "A", "U"] }
+        ] : [
+            { w: "TOPI 🧢", ans: "O", opts: ["O", "A", "U"] },
+            { w: "BUS 🚌", ans: "U", opts: ["U", "I", "E"] },
+            { w: "JAM ⏰", ans: "A", opts: ["A", "O", "E"] },
+            { w: "CAT 🎨", ans: "A", opts: ["A", "I", "U"] }
         ];
-        let item = bank[Math.floor(Math.random() * bank.length)];
-        return { title: "TEBAK HURUF", sub: "Huruf pertama kata ini:", display: item.word, target: item.ans, options: shuffle([item.ans, 'P', 'R']) };
+        let item = cvcList[Math.floor(Math.random() * cvcList.length)];
+        return {
+            title: isEN ? "CVC WORDS 📖" : "KATA KANAK 📖",
+            sub: isEN ? "Fill in the middle vowel:" : "Lengkapi huruf vokal tengahnya:",
+            display: `<div class="text-3xl font-black text-slate-900 tracking-widest">${item.w.replace(item.ans, "<span class='text-sky-600 border-b-4 border-sky-600 px-1'>_</span>")}</div>`,
+            target: item.ans,
+            options: shuffle(item.opts)
+        };
+    } else if (type === 1) {
+        let n1 = Math.floor(Math.random() * (stage + 3)) + 1;
+        let n2 = Math.floor(Math.random() * 5) + 1;
+        let ans = n1 + n2;
+        return {
+            title: isEN ? "ADDITION ➕" : "PENJUMLAHAN ➕",
+            sub: isEN ? "Calculate total addition:" : "Hitung total penjumlahan ini:",
+            display: `<div class="text-3xl font-black text-slate-900">${n1} + ${n2} = <span class="text-sky-600">?</span></div>`,
+            target: ans,
+            options: generateUniqueOptions(ans)
+        };
+    } else {
+        let n1 = Math.floor(Math.random() * 6) + 4;
+        let n2 = Math.floor(Math.random() * 3) + 1;
+        let ans = n1 - n2;
+        return {
+            title: isEN ? "SUBTRACTION ➖" : "PENGURANGAN ➖",
+            sub: isEN ? "Calculate subtraction:" : "Hitung sisa pengurangan ini:",
+            display: `<div class="text-3xl font-black text-slate-900">${n1} - ${n2} = <span class="text-sky-600">?</span></div>`,
+            target: ans,
+            options: generateUniqueOptions(ans)
+        };
     }
+}
 
-    let spellBank = [
-        { disp: 'C - _ - T 🐱', ans: 'A', title: 'CAT (Kucing)', sub: 'Lengkapi huruf tengah:' },
-        { disp: 'D - _ - G 🐶', ans: 'O', title: 'DOG (Anjing)', sub: 'Lengkapi huruf tengah:' },
-        { disp: 'S - _ - N ☀️', ans: 'U', title: 'SUN (Matahari)', sub: 'Lengkapi huruf tengah:' },
-        { disp: 'B - _ - S 🚌', ans: 'U', title: 'BUS (Bis)', sub: 'Lengkapi huruf tengah:' }
-    ];
-    let spell = spellBank[Math.floor(Math.random() * spellBank.length)];
-    return { title: spell.title, sub: spell.sub, display: spell.disp, target: spell.ans, options: shuffle([spell.ans, 'E', 'I']) };
+function genSD1(stage) {
+    let type = Math.floor(Math.random() * 3);
+    let isEN = (currentLang === 'EN');
+
+    if (type === 0) {
+        let sentences = isEN ? [
+            { q: "The grass is [ ? ] 🌿", ans: "GREEN", opts: ["GREEN", "BLUE", "RED"] },
+            { q: "An elephant is [ ? ] 🐘", ans: "BIG", opts: ["BIG", "SMALL", "TINY"] },
+            { q: "The sun is [ ? ] ☀️", ans: "HOT", opts: ["HOT", "COLD", "DARK"] },
+            { q: "Ice cream is [ ? ] 🍦", ans: "SWEET", opts: ["SWEET", "SALTY", "SOUR"] }
+        ] : [
+            { q: "Rumput berwarna [ ? ] 🌿", ans: "HIJAU", opts: ["HIJAU", "BIRU", "MERAH"] },
+            { q: "Gajah berukuran [ ? ] 🐘", ans: "BESAR", opts: ["BESAR", "KECIL", "TIPIS"] },
+            { q: "Matahari terasa [ ? ] ☀️", ans: "PANAS", opts: ["PANAS", "DINGIN", "GELAP"] },
+            { q: "Es krim rasanya [ ? ] 🍦", ans: "MANIS", opts: ["MANIS", "ASIN", "PAHIT"] }
+        ];
+        let item = sentences[Math.floor(Math.random() * sentences.length)];
+        return {
+            title: isEN ? "ENGLISH SENTENCE 🇬🇧" : "KALIMAT BAHASA 🇮🇩",
+            sub: isEN ? "Complete the sentence:" : "Lengkapi kalimat ini:",
+            display: `<div class="text-xl font-black text-slate-900">${item.q}</div>`,
+            target: item.ans,
+            options: shuffle(item.opts)
+        };
+    } else if (type === 1) {
+        let n1 = Math.floor(Math.random() * 6) + stage;
+        let n2 = Math.floor(Math.random() * 4) + 2;
+        let isAdd = Math.random() > 0.5;
+        let ans = isAdd ? n1 + n2 : n1 - n2;
+        return {
+            title: isEN ? "STORY MATH 📖" : "SOAL CERITA 📖",
+            sub: isEN ? "Solve this word problem:" : "Selesaikan soal cerita ini:",
+            display: `<div class="text-base font-black text-slate-900 leading-snug">${
+                isEN 
+                ? (isAdd ? `Alex has ${n1} candies, gets ${n2} more. Total?` : `Alex has ${n1} cakes, eats ${n2}. Remaining?`)
+                : (isAdd ? `Ani punya ${n1} permen, dibeli lagi ${n2}. Totalnya?` : `Ani punya ${n1} kue, dimakan ${n2}. Sisa berapa?`)
+            }</div>`,
+            target: ans,
+            options: generateUniqueOptions(ans)
+        };
+    } else {
+        let n1 = Math.floor(Math.random() * 15) + 5;
+        let n2 = Math.floor(Math.random() * 15) + 5;
+        while (n1 === n2) n2 = Math.floor(Math.random() * 15) + 5;
+        let isBig = Math.random() > 0.5;
+        let ans = isBig ? Math.max(n1, n2) : Math.min(n1, n2);
+        return {
+            title: isEN ? "COMPARE NUMBERS" : "BANDINGKAN ANGKA",
+            sub: isEN ? (isBig ? "Which is LARGER?" : "Which is SMALLER?") : (isBig ? "Mana yang LEBIH BESAR?" : "Mana yang LEBIH KECIL?"),
+            display: `<div class="text-3xl font-black text-slate-900">${n1} <span class="text-sky-600 font-bold">VS</span> ${n2}</div>`,
+            target: ans,
+            options: shuffle([n1, n2])
+        };
+    }
+}
+
+function genSD2(stage) {
+    let type = Math.floor(Math.random() * 3);
+    let isEN = (currentLang === 'EN');
+
+    if (type === 0) {
+        let n1 = Math.floor(Math.random() * 5) + 2;
+        let n2 = Math.floor(Math.random() * 5) + 1;
+        let ans = n1 * n2;
+        return {
+            title: isEN ? "MULTIPLICATION ✖️" : "PERKALIAN DASAR ✖️",
+            sub: isEN ? "Solve multiplication:" : "Hitung perkalian sederhana ini:",
+            display: `<div class="text-3xl font-black text-slate-900">${n1} × ${n2} = <span class="text-sky-600">?</span></div>`,
+            target: ans,
+            options: generateUniqueOptions(ans)
+        };
+    } else if (type === 1) {
+        let hour = Math.floor(Math.random() * 11) + 1;
+        let formatted = (hour < 10 ? "0" : "") + hour + ".00";
+        return {
+            title: isEN ? "TELLING TIME ⏰" : "MEMBACA JAM ⏰",
+            sub: isEN ? `Short hand at ${hour}, long hand at 12.` : `Jarum pendek di angka ${hour}, jarum panjang di angka 12.`,
+            display: `<div class="text-xl font-black text-slate-900">${isEN ? "What time is it?" : "Jam berapa sekarang?"}</div>`,
+            target: formatted,
+            options: shuffle([formatted, "12.00", "06.00"])
+        };
+    } else {
+        let readingPool = isEN ? [
+            { text: "Roni likes reading science books every afternoon at the library.", q: "Where does Roni read?", ans: "LIBRARY", opts: ["LIBRARY", "PARK", "CLASS"] },
+            { text: "Budi plays soccer with his friends every Sunday at the field.", q: "Where does Budi play?", ans: "FIELD", opts: ["FIELD", "HOME", "BEACH"] },
+            { text: "Siti loves baking chocolate cakes in the kitchen with mom.", q: "Where does Siti bake?", ans: "KITCHEN", opts: ["KITCHEN", "PARK", "SCHOOL"] }
+        ] : [
+            { text: "Roni suka membaca buku sains setiap sore di perpustakaan.", q: "Di mana Roni membaca?", ans: "PERPUSTAKAAN", opts: ["PERPUSTAKAAN", "TAMAN", "KELAS"] },
+            { text: "Budi bermain sepak bola bersama teman-temannya di lapangan.", q: "Di mana Budi bermain?", ans: "LAPANGAN", opts: ["LAPANGAN", "RUMAH", "PANTAI"] },
+            { text: "Siti membantu ibu membuat kue cokelat lezat di dapur.", q: "Di mana Siti memasak?", ans: "DAPUR", opts: ["DAPUR", "TAMAN", "SEKOLAH"] }
+        ];
+
+        let item = readingPool[Math.floor(Math.random() * readingPool.length)];
+
+        return {
+            title: isEN ? "READING COMPREHENSION 📖" : "MEMBACA PEMAHAMAN 📖",
+            sub: item.text,
+            display: `<div class="text-base font-black text-slate-900">${item.q}</div>`,
+            target: item.ans,
+            options: shuffle(item.opts)
+        };
+    }
+}
+
+function genSD3(stage) {
+    let type = Math.floor(Math.random() * 3);
+    let isEN = (currentLang === 'EN');
+
+    if (type === 0) {
+        let stories = isEN ? [
+            { t: "Sarah has two fluffy rabbits. They love eating fresh orange carrots.", q: "What do rabbits eat?", ans: "CARROTS", opts: ["CARROTS", "APPLES", "MILK"] },
+            { t: "Lions are wild animals that live in open grasslands and hunt meat.", q: "What do lions eat?", ans: "MEAT", opts: ["MEAT", "GRASS", "FRUIT"] }
+        ] : [
+            { t: "Siti punya dua kelinci lucu. Mereka suka makan wortel oranye yang segar.", q: "Apa yang dimakan kelinci?", ans: "WORTEL", opts: ["WORTEL", "APEL", "SUSU"] },
+            { t: "Singa adalah hewan buas yang tinggal di padang rumput dan makan daging.", q: "Apa makanan singa?", ans: "DAGING", opts: ["DAGING", "RUMPUT", "BUAH"] }
+        ];
+
+        let item = stories[Math.floor(Math.random() * stories.length)];
+        return {
+            title: isEN ? "READING SD-3 📚" : "MEMBACA SD-3 📚",
+            sub: item.t,
+            display: `<div class="text-base font-black text-slate-900">${item.q}</div>`,
+            target: item.ans,
+            options: shuffle(item.opts)
+        };
+    } else if (type === 1) {
+        let n1 = Math.floor(Math.random() * 10) + 10;
+        let n2 = Math.floor(Math.random() * 8) + 5;
+        let n3 = Math.floor(Math.random() * 5) + 2;
+        let ans = n1 + n2 - n3;
+        return {
+            title: isEN ? "MATH LAB SD-3 🧪" : "MATEMATIKA SD-3 🧪",
+            sub: isEN ? "Calculate 3-number operation:" : "Hitung operasi campuran 3 angka ini:",
+            display: `<div class="text-2xl font-black text-slate-900">${n1} + ${n2} - ${n3} = <span class="text-sky-600">?</span></div>`,
+            target: ans,
+            options: generateUniqueOptions(ans)
+        };
+    } else {
+        let hours = Math.floor(Math.random() * 3) + 2;
+        let ans = hours * 60;
+        return {
+            title: isEN ? "TIME CONVERSION ⏱️" : "KONVERSI WAKTU ⏱️",
+            sub: isEN ? `If 1 hour = 60 mins, then ${hours} hours =` : `Jika 1 jam = 60 menit, maka ${hours} jam =`,
+            display: `<div class="text-2xl font-black text-slate-900">${isEN ? "How many minutes?" : "Berapa menit?"}</div>`,
+            target: ans,
+            options: generateUniqueOptions(ans)
+        };
+    }
+}
+
+function getRandLetterExcept(ex) {
+    let alpha = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+    let res = alpha[Math.floor(Math.random() * alpha.length)];
+    while (res === ex) res = alpha[Math.floor(Math.random() * alpha.length)];
+    return res;
 }
 
 function generateUniqueOptions(correct) {
@@ -1008,7 +1207,7 @@ function generateUniqueOptions(correct) {
     while (opts.size < 3) {
         let offset = (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 3) + 1);
         let val = correct + offset;
-        if (val > 0) opts.add(val);
+        if (val >= 0) opts.add(val);
     }
     return shuffle(Array.from(opts));
 }
